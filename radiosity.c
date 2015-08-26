@@ -40,7 +40,7 @@ void compute_radiosity(triangle* trgs, size_t trgcount) {
 					double difflen = vec3_len(diff);
 					
 					// Use a conservative distance estimate: average of
-					// distances between corners.
+					// distances between corners and distance between centers.
 					double dist = 0.0;
 					for(int a = 0; a < 3; ++a) {
 						for(int b = 0; b < 3; ++b) {
@@ -50,6 +50,7 @@ void compute_radiosity(triangle* trgs, size_t trgcount) {
 						}
 					}
 					dist /= 9.0;
+					dist = 0.25 * dist + 0.75 * difflen;
 					
 					vec3 ni = triangle_normal(trgs[i]);
 					vec3 nj = triangle_normal(trgs[j]);
@@ -60,7 +61,7 @@ void compute_radiosity(triangle* trgs, size_t trgcount) {
 						val = 0.0;
 					} else {
 						val = trgs[j].reflectivity * cosi * cosj;
-						val *= triangle_area(trgs[i]);
+						val *= triangle_area(trgs[j]);
 						val /= PI * dist * dist;
 					}
 				}
