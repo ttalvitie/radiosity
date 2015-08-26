@@ -1,6 +1,7 @@
 #include "common.h"
 #include "triangle.h"
 #include "draw_html.h"
+#include "radiosity.h"
 
 #include <errno.h>
 
@@ -31,6 +32,8 @@ int main(int argc, char* argv[]) {
 		printf(" (using edge length limit %lf)", edge_length_limit);
 	}
 	printf("\n");
+	
+	compute_radiosity(trgs, trgcount);
 	
 	normalize_triangle_radiosities(trgs, trgcount);
 	draw_to_html(argv[2], trgs, trgcount);

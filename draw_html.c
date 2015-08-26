@@ -57,7 +57,6 @@ static void draw_triangle(FILE* fp, triangle trg) {
 				fp, "  ctx.fillStyle = 'rgb(%d, %d, %d)';\n",
 				color, color, color
 			);
-			color = 0;
 			fprintf(
 				fp, "  ctx.strokeStyle = 'rgb(%d, %d, %d)';\n",
 				color, color, color

@@ -1,3 +1,4 @@
+/// @file
 #pragma once
 
 #include "common.h"
@@ -41,8 +42,3 @@ void free_matrix(matrix mat);
 /// Multiplies matrix \p m by vector \p v, storing the result in \p result. The
 /// sizes must match.
 void matrix_vector_mul(matrix m, vector v, vector result);
-
-/// Multiplies matrix \p a by matrix \p b, storing the result in \p result. The
-/// sizes must match.
-void matrix_mul(matrix a, matrix b, matrix result);
-

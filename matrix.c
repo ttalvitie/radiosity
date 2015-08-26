@@ -37,28 +37,3 @@ void matrix_vector_mul(matrix m, vector v, vector result) {
 		result.data[i] = val;
 	}
 }
-
-void matrix_mul(matrix a, matrix b, matrix result) {
-	size_t n = a.size;
-	if(b.size != n) fail("matrix_mul: sizes do not match.");
-	if(result.size != n) fail("matrix_mul: sizes do not match.");
-	
-	size_t ij = 0;
-	for(size_t i = 0; i < n; ++i) {
-		for(size_t j = 0; j < n; ++j) {
-			double val = 0.0;
-			
-			size_t apos = n * i;
-			size_t bpos = j;
-			for(size_t k = 0; k < n; ++k) {
-				val += a.data[apos] * b.data[bpos];
-				
-				++apos;
-				bpos += n;
-			}
-			
-			result.data[ij] = val;
-			++ij;
-		}
-	}
-}
