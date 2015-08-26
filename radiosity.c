@@ -85,7 +85,7 @@ void compute_radiosity(triangle* trgs, size_t trgcount) {
 			double d = fabs(B.data[i] - B2.data[i]);
 			if(d > asd) asd = d;
 		}
-		printf("Iteration #%d: maximum matrix difference %lf\n", i + 1, asd);
+		printf("Iteration #%d: maximum matrix element difference %lf\n", i + 1, asd);
 	}
 	
 	// Read the result from B.

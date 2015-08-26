@@ -44,7 +44,7 @@ static void draw_triangle(FILE* fp, triangle trg) {
 				if(radiosity > 1.0) radiosity = 1.0;
 				
 				// Gamma correction.
-				radiosity = pow(radiosity, 0.9);
+				radiosity = pow(radiosity, 0.85);
 				
 				color = floor(256 * radiosity);
 				if(color < 0) color = 0;
@@ -94,7 +94,7 @@ void draw_to_html(const char* filename, triangle* trgs, size_t trgcount) {
 	fprintf(fp, "  ctx.fillStyle = '#FFFFFF';\n");
 	double coef = 0.5 * wd / tan(PI * fov / 180.0);
 	fprintf(fp, "  ctx.scale(%lf, %lf);\n", coef, coef);
-	fprintf(fp, "  ctx.lineWidth = %lf;\n", 1.6 / coef);
+	fprintf(fp, "  ctx.lineWidth = %lf;\n", 1.2 / coef);
 	fprintf(fp, "  ctx.lineJoin = 'round';\n");
 	fprintf(fp, "  ctx.lineCap = 'round';\n");
 	
