@@ -1,19 +1,19 @@
 #pragma once
 
 #include "common.h"
-#include "vector.h"
+#include "vec3.h"
 
 /// Structure containing information about camera direction and position, used
 /// for rendering a scene.
 typedef struct {
 	/// The position of the camera.
-	vector position;
+	vec3 position;
 	
 	/// The direction the camera looks at.
-	vector forward;
+	vec3 forward;
 	
 	/// The direction directly towards the right from the camera.
-	vector rightwards;
+	vec3 rightwards;
 	
 	/// The width of the picture taken by the camera.
 	double width;
