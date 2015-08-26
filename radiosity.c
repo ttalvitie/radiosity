@@ -35,9 +35,34 @@ void compute_radiosity(triangle* trgs, size_t trgcount) {
 				} else {
 					vec3 ci = triangle_centroid(trgs[i]);
 					vec3 cj = triangle_centroid(trgs[j]);
-					double dist2 = vec3_len2(vec3_sub(ci, cj));
 					
-					val = trgs[i].reflectivity / (PI * dist2);
+					vec3 diff = vec3_sub(cj, ci);
+					double difflen = vec3_len(diff);
+					
+					// Use a conservative distance estimate: average of
+					// distances between corners.
+					double dist = 0.0;
+					for(int a = 0; a < 3; ++a) {
+						for(int b = 0; b < 3; ++b) {
+							vec3 ci = trgs[i].corners[a];
+							vec3 cj = trgs[j].corners[b];
+							dist += vec3_len(vec3_sub(ci, cj));
+						}
+					}
+					dist /= 9.0;
+					
+					vec3 ni = triangle_normal(trgs[i]);
+					vec3 nj = triangle_normal(trgs[j]);
+					
+					double cosi = vec3_dot(ni, diff) / (difflen * vec3_len(ni));
+					double cosj = -vec3_dot(nj, diff) / (difflen * vec3_len(nj));
+					if(cosi <= 0.0 || cosj <= 0.0) {
+						val = 0.0;
+					} else {
+						val = trgs[j].reflectivity * cosi * cosj;
+						val *= triangle_area(trgs[i]);
+						val /= PI * dist * dist;
+					}
 				}
 			}
 			
@@ -48,12 +73,19 @@ void compute_radiosity(triangle* trgs, size_t trgcount) {
 	}
 	
 	// Iterate assignment B <- Y B.
-	for(int i = 0; i < 100; ++i) {
+	for(int i = 0; i < 40; ++i) {
 		matrix_vector_mul(Y, B, B2);
 		
 		vector tmp = B;
 		B = B2;
 		B2 = tmp;
+		
+		double asd = 0.0;
+		for(size_t i = 0; i < trgcount; ++i) {
+			double d = fabs(B.data[i] - B2.data[i]);
+			if(d > asd) asd = d;
+		}
+		printf("Iteration #%d: maximum matrix difference %lf\n", i + 1, asd);
 	}
 	
 	// Read the result from B.

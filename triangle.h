@@ -37,6 +37,13 @@ static inline vec3 triangle_centroid(triangle trg) {
 	ret = vec3_mul(ret, 1.0 / 3.0);
 	return ret;
 }
+/// Computes the area of triangle \p trg.
+static inline double triangle_area(triangle trg) {
+	return 0.5 * vec3_len(vec3_cross(
+		vec3_sub(trg.corners[2], trg.corners[0]),
+		vec3_sub(trg.corners[1], trg.corners[0])
+	));
+}
 
 /// Normalize the radiosity values of all triangles in an array to the range
 /// [0, 1].

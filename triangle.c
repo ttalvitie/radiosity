@@ -3,20 +3,19 @@
 #include <errno.h>
 
 void normalize_triangle_radiosities(triangle* trgs, size_t trgcount) {
-	double minval = 0.0;
 	double maxval = 0.0;
 	for(size_t i = 0; i < trgcount; ++i) {
+		// Only take into account the triangles that are not lights, i.e. do not
+		// emit light.
+		if(trgs[i].emitted_energy > 0.0) continue;
+		
 		double val = trgs[i].radiosity;
-		if(val < minval) minval = val;
 		if(val > maxval) maxval = val;
 	}
-	if(minval == maxval) {
-		minval -= 1.0;
-		maxval += 1.0;
-	}
+	if(maxval == 0.0) maxval = 1.0;
 	
 	for(size_t i = 0; i < trgcount; ++i) {
-		double t = (trgs[i].radiosity - minval) / (maxval - minval);
+		double t = 0.8 * trgs[i].radiosity / maxval;
 		if(t < 0.0) t = 0.0;
 		if(t > 1.0) t = 1.0;
 		trgs[i].radiosity = t;

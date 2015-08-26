@@ -27,6 +27,9 @@ int main(int argc, char* argv[]) {
 	size_t trgcount;
 	trgcount = read_triangles_from_file(argv[1], edge_length_limit, &trgs);
 	
+	trgs[1].emitted_energy = 150;
+	trgs[531].emitted_energy = 5;
+	
 	printf("Read %zu triangles", trgcount);
 	if(edge_length_limit > 0.0) {
 		printf(" (using edge length limit %lf)", edge_length_limit);
