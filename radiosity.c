@@ -57,15 +57,18 @@ void compute_radiosity(triangle* trgs, size_t trgcount) {
 					
 					double cosi = vec3_dot(ni, diff) / (difflen * vec3_len(ni));
 					double cosj = -vec3_dot(nj, diff) / (difflen * vec3_len(nj));
+					
 					if(cosi <= 0.0 || cosj <= 0.0) {
 						val = 0.0;
 					} else {
-						val = trgs[j].reflectivity * cosi * cosj;
+						val = trgs[i].reflectivity * cosi * cosj;
 						val *= triangle_area(trgs[j]);
 						val /= PI * dist * dist;
 					}
 				}
 			}
+			
+			if(isnan(val)) fail("NaN value created in radiosity matrix. Possibly caused by degenerate triangles.");
 			
 			Y.data[Ypos] = val;
 			
