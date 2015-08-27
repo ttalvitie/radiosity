@@ -2,14 +2,26 @@
 
 #include "matrix.h"
 
+#ifdef WORKERTHREADS
+#include <pthread.h>
+#endif
+
 static inline float radiosity_matrix_element(
 	triangle* trgs, size_t trgcount,
 	triangle* collision_trgs, size_t collision_trgcount,
 	size_t i, size_t j
 ) {
-	if(i == j) {
+	if(j == trgcount) {
+		if(i == trgcount) {
+			return 1.0;
+		} else {
+			return trgs[i].emitted_energy;
+		}
+	}
+	if(i == trgcount || i == j) {
 		return 0.0;
 	}
+	
 	vec3 ci = triangle_centroid(trgs[i]);
 	vec3 cj = triangle_centroid(trgs[j]);
 	
@@ -48,7 +60,59 @@ static inline float radiosity_matrix_element(
 	float val = trgs[i].reflectivity * cosi * cosj;
 	val *= triangle_area(trgs[j]);
 	val /= PI * dist * dist;
+	
+	if(isnan(val)) {
+		fail(
+			"NaN value created in radiosity matrix. "
+			"Possibly caused by degenerate triangles."
+		);
+	}
+	
 	return val;
+}
+
+typedef struct {
+	triangle* trgs;
+	size_t trgcount;
+	triangle* collision_trgs;
+	size_t collision_trgcount;
+	size_t next_percent;
+	size_t i;
+	matrix Y;
+	
+#ifdef WORKERTHREADS
+	pthread_mutex_t lock;
+#endif
+} matrix_job;
+
+static void* matrix_worker(void* ptr) {
+	matrix_job* job = (matrix_job*)ptr;
+	while(1) {
+#ifdef WORKERTHREADS
+		if(pthread_mutex_lock(&job->lock)) printf("Could not lock mutex.");
+#endif
+		
+		size_t i = job->i;
+		if(i == job->trgcount + 1) break;
+		if(100 * i >= job->next_percent * job->trgcount) {
+			printf("Populating radiosity matrix: %zu%%.\n", job->next_percent++);
+		}
+		++job->i;
+		
+#ifdef WORKERTHREADS
+		if(pthread_mutex_unlock(&job->lock)) printf("Could not unlock mutex.");
+#endif
+		
+		size_t Ypos = i * (job->trgcount + 1);
+		for(size_t j = 0; j <= job->trgcount; ++j) {
+			job->Y.data[Ypos++] = radiosity_matrix_element(
+				job->trgs, job->trgcount,
+				job->collision_trgs, job->collision_trgcount,
+				i, j
+			);
+		}
+	}
+	return NULL;
 }
 
 void compute_radiosity(
@@ -68,43 +132,35 @@ void compute_radiosity(
 	}
 	B.data[trgcount] = 1.0;
 	
-	size_t Ypos = 0;
-	size_t next_percent = 0;
-	for(size_t i = 0; i <= trgcount; ++i) {
-		if(100 * i >= next_percent * trgcount) {
-			printf("Populating radiosity matrix: %zu%%.\n", next_percent++);
-		}
-		for(size_t j = 0; j <= trgcount; ++j) {
-			float val;
-			
-			if(j == trgcount) {
-				if(i == trgcount) {
-					val = 1.0;
-				} else {
-					val = trgs[i].emitted_energy;
-				}
-			} else if(i == trgcount) {
-				val = 0.0;
-			} else {
-				val = radiosity_matrix_element(
-					trgs, trgcount,
-					collision_trgs, collision_trgcount,
-					i, j
-				);
-			}
-			
-			if(isnan(val)) {
-				fail(
-					"NaN value created in radiosity matrix. "
-					"Possibly caused by degenerate triangles."
-				);
-			}
-			
-			Y.data[Ypos] = val;
-			
-			++Ypos;
+	matrix_job job;
+	job.trgs = trgs;
+	job.trgcount = trgcount;
+	job.collision_trgs = collision_trgs;
+	job.collision_trgcount = collision_trgcount;
+	job.next_percent = 0;
+	job.i = 0;
+	job.Y = Y;
+	
+#ifdef WORKERTHREADS
+	if(pthread_mutex_init(&job.lock, NULL)) fail("Could not init mutex.");
+	
+	pthread_t workers[WORKERTHREADS];
+	
+	for(size_t i = 0; i < WORKERTHREADS; ++i) {
+		if(pthread_create(&(workers[i]), NULL, matrix_worker, &job)) {
+			fail("Could not spawn worker thread.");
 		}
 	}
+	for(size_t i = 0; i < WORKERTHREADS; ++i) {
+		if(pthread_join(workers[i], NULL)) {
+			fail("Could not join worker thread.");
+		}
+	}
+	
+	if(pthread_mutex_destroy(&job.lock)) fail("Could not destroy mutex.");
+#else
+	matrix_worker(&job);
+#endif
 	
 	// Iterate assignment B <- Y B.
 	for(int i = 0; i < 100; ++i) {
