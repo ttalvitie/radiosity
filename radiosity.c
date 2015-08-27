@@ -19,12 +19,7 @@ static inline float radiosity_matrix_element(
 			return 0.0;
 		}
 	}
-/*	for(size_t k = 0; k < trgcount; ++k) {
-		if(segment_intersects_triangle(ci, cj, trgs[k])) {
-			return 0.0;
-		}
-	}
-*/	
+	
 	vec3 diff = vec3_sub(cj, ci);
 	float difflen = vec3_len(diff);
 	

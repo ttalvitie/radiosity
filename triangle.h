@@ -55,7 +55,7 @@ static inline int segment_intersects_triangle(vec3 a, vec3 b, triangle trg) {
 	if((da > 0.0) == (db > 0.0)) return 0;
 	
 	float t = da / (da - db);
-	if(t < 1e-6 || t > 1.0 - 1e-6) return 0;
+	if(t < 1e-4 || t > 1.0 - 1e-4) return 0;
 	
 	vec3 v = vec3_add(vec3_mul(a, 1.0 - t), vec3_mul(b, t));
 	
@@ -69,7 +69,7 @@ static inline int segment_intersects_triangle(vec3 a, vec3 b, triangle trg) {
 		subs_area += triangle_area(subtrg);
 		subtrg.corners[i] = trg.corners[i];
 	}
-	return subs_area / whole_area < 1.0 + 1e-6;
+	return subs_area / whole_area < 1.0 + 1e-4;
 }
 
 /// Normalize the radiosity values of all triangles in an array to the range
