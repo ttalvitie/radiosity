@@ -93,7 +93,13 @@ static void* matrix_worker(void* ptr) {
 #endif
 		
 		size_t i = job->i;
-		if(i == job->trgcount + 1) break;
+		printf("Got %zu\n", i);
+		if(i == job->trgcount + 1) {
+#ifdef WORKERTHREADS
+			if(pthread_mutex_unlock(&job->lock)) printf("Could not unlock mutex.");
+#endif
+			break;
+		}
 		if(100 * i >= job->next_percent * job->trgcount) {
 			printf("Populating radiosity matrix: %zu%%.\n", job->next_percent++);
 		}
