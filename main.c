@@ -123,5 +123,8 @@ int main(int argc, char* argv[]) {
 	normalize_triangle_radiosities(trgs, trgcount);
 	draw_to_svg(argv[2], trgs, trgcount);
 	
+	free(orig_trgs);
+	free(trgs);
+	
 	return 0;
 }

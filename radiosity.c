@@ -93,7 +93,6 @@ static void* matrix_worker(void* ptr) {
 #endif
 		
 		size_t i = job->i;
-		printf("Got %zu\n", i);
 		if(i == job->trgcount + 1) {
 #ifdef WORKERTHREADS
 			if(pthread_mutex_unlock(&job->lock)) printf("Could not unlock mutex.");
