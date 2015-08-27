@@ -187,14 +187,14 @@ int main() {
 	emi = 1;
 	y = 0.775;
 	x = -0.2;
-	sphere(0.075, 20);
+	sphere(0.075, 16);
 	
 	// Lamp bar
 	reset();
 	ref = 0.3;
 	y = 0.85;
 	x = -0.2;
-	y_cylinder(0.01, 0.15, 10, 10);
+	y_cylinder(0.005, 0.15, 10, 6);
 	
 	// Wall lamp
 	reset();
@@ -202,19 +202,19 @@ int main() {
 	x = 1;
 	y = 0.55;
 	z = -0.3;
-	halfsphere(0.05, 10);
+	halfsphere(0.05, 12);
 	
 	// Table legs
 	reset();
 	x = -0.5;
 	z = -0.3;
-	y_cylinder(0.02, 0.35, 10, 10);
+	y_cylinder(0.02, 0.35, 10, 6);
 	x = -x;
-	y_cylinder(0.02, 0.35, 10, 10);
+	y_cylinder(0.02, 0.35, 10, 6);
 	z = -z;
-	y_cylinder(0.02, 0.35, 10, 10);
+	y_cylinder(0.02, 0.35, 10, 6);
 	x = -x;
-	y_cylinder(0.02, 0.35, 10, 10);
+	y_cylinder(0.02, 0.35, 10, 6);
 	
 	// Table
 	reset();

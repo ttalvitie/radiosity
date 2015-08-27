@@ -2,6 +2,55 @@
 
 #include "matrix.h"
 
+static inline double radiosity_matrix_element(
+	triangle* trgs, size_t trgcount,
+	size_t i, size_t j
+) {
+	if(i == j) {
+		return 0.0;
+	}
+	vec3 ci = triangle_centroid(trgs[i]);
+	vec3 cj = triangle_centroid(trgs[j]);
+	
+	// If the centroids do not see each other, no light propagation.
+	for(size_t k = 0; k < trgcount; ++k) {
+		if(k == i || k == j) continue;
+		if(segment_intersects_triangle(ci, cj, trgs[k])) {
+			return 0.0;
+		}
+	}
+	
+	vec3 diff = vec3_sub(cj, ci);
+	double difflen = vec3_len(diff);
+	
+	vec3 ni = triangle_normal(trgs[i]);
+	vec3 nj = triangle_normal(trgs[j]);
+	
+	double cosi = vec3_dot(ni, diff) / (difflen * vec3_len(ni));
+	double cosj = -vec3_dot(nj, diff) / (difflen * vec3_len(nj));
+	
+	// If the triangles do not face each other, no light propagation.
+	if(cosi <= 0.0 || cosj <= 0.0) return 0.0;
+	
+	// Use a conservative distance estimate: average of
+	// distances between corners and distance between centroids.
+	double dist = 0.0;
+	for(int a = 0; a < 3; ++a) {
+		for(int b = 0; b < 3; ++b) {
+			vec3 ci = trgs[i].corners[a];
+			vec3 cj = trgs[j].corners[b];
+			dist += vec3_len(vec3_sub(ci, cj));
+		}
+	}
+	dist /= 9.0;
+	dist = 0.25 * dist + 0.75 * difflen;
+	
+	double val = trgs[i].reflectivity * cosi * cosj;
+	val *= triangle_area(trgs[j]);
+	val /= PI * dist * dist;
+	return val;
+}
+
 void compute_radiosity(triangle* trgs, size_t trgcount) {
 	// We solve radiosity B from the equation B = E + X B, where E is the
 	// emitted energy and X is the radiosity matrix. By augmenting the matrix
@@ -17,7 +66,11 @@ void compute_radiosity(triangle* trgs, size_t trgcount) {
 	B.data[trgcount] = 1.0;
 	
 	size_t Ypos = 0;
+	size_t next_percent = 0;
 	for(size_t i = 0; i <= trgcount; ++i) {
+		if(100 * i >= next_percent * trgcount) {
+			printf("Populating radiosity matrix: %zu%%.\n", next_percent++);
+		}
 		for(size_t j = 0; j <= trgcount; ++j) {
 			double val;
 			
@@ -30,45 +83,15 @@ void compute_radiosity(triangle* trgs, size_t trgcount) {
 			} else if(i == trgcount) {
 				val = 0.0;
 			} else {
-				if(i == j) {
-					val = 0.0;
-				} else {
-					vec3 ci = triangle_centroid(trgs[i]);
-					vec3 cj = triangle_centroid(trgs[j]);
-					
-					vec3 diff = vec3_sub(cj, ci);
-					double difflen = vec3_len(diff);
-					
-					// Use a conservative distance estimate: average of
-					// distances between corners and distance between centers.
-					double dist = 0.0;
-					for(int a = 0; a < 3; ++a) {
-						for(int b = 0; b < 3; ++b) {
-							vec3 ci = trgs[i].corners[a];
-							vec3 cj = trgs[j].corners[b];
-							dist += vec3_len(vec3_sub(ci, cj));
-						}
-					}
-					dist /= 9.0;
-					dist = 0.25 * dist + 0.75 * difflen;
-					
-					vec3 ni = triangle_normal(trgs[i]);
-					vec3 nj = triangle_normal(trgs[j]);
-					
-					double cosi = vec3_dot(ni, diff) / (difflen * vec3_len(ni));
-					double cosj = -vec3_dot(nj, diff) / (difflen * vec3_len(nj));
-					
-					if(cosi <= 0.0 || cosj <= 0.0) {
-						val = 0.0;
-					} else {
-						val = trgs[i].reflectivity * cosi * cosj;
-						val *= triangle_area(trgs[j]);
-						val /= PI * dist * dist;
-					}
-				}
+				val = radiosity_matrix_element(trgs, trgcount, i, j);
 			}
 			
-			if(isnan(val)) fail("NaN value created in radiosity matrix. Possibly caused by degenerate triangles.");
+			if(isnan(val)) {
+				fail(
+					"NaN value created in radiosity matrix. "
+					"Possibly caused by degenerate triangles."
+				);
+			}
 			
 			Y.data[Ypos] = val;
 			
@@ -77,7 +100,7 @@ void compute_radiosity(triangle* trgs, size_t trgcount) {
 	}
 	
 	// Iterate assignment B <- Y B.
-	for(int i = 0; i < 40; ++i) {
+	for(int i = 0; i < 100; ++i) {
 		matrix_vector_mul(Y, B, B2);
 		
 		vector tmp = B;
