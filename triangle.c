@@ -3,19 +3,19 @@
 #include <errno.h>
 
 void normalize_triangle_radiosities(triangle* trgs, size_t trgcount) {
-	double maxval = 0.0;
+	float maxval = 0.0;
 	for(size_t i = 0; i < trgcount; ++i) {
 		// Only take into account the triangles that are not lights, i.e. do not
 		// emit light.
 		if(trgs[i].emitted_energy > 0.0) continue;
 		
-		double val = trgs[i].radiosity;
+		float val = trgs[i].radiosity;
 		if(val > maxval) maxval = val;
 	}
 	if(maxval == 0.0) maxval = 1.0;
 	
 	for(size_t i = 0; i < trgcount; ++i) {
-		double t = 0.8 * trgs[i].radiosity / maxval;
+		float t = 0.8 * trgs[i].radiosity / maxval;
 		if(t < 0.0) t = 0.0;
 		if(t > 1.0) t = 1.0;
 		trgs[i].radiosity = t;
@@ -24,7 +24,7 @@ void normalize_triangle_radiosities(triangle* trgs, size_t trgcount) {
 
 static void add_subdivided_triangle(
 	triangle trg,
-	double edge_length_limit2,
+	float edge_length_limit2,
 	triangle** output,
 	size_t* count,
 	size_t* allocated
@@ -32,11 +32,11 @@ static void add_subdivided_triangle(
 	if(edge_length_limit2 > 0.0) {
 		// If the longest edge of the triangle has length larger than the limit,
 		// then we split that edge.
-		double maxval = -1.0;
+		float maxval = -1.0;
 		int maxval_i = 0;
 		for(int i = 0; i < 3; ++i) {
 			int j = (i + 1) % 3;
-			double val = vec3_len2(vec3_sub(trg.corners[i], trg.corners[j]));
+			float val = vec3_len2(vec3_sub(trg.corners[i], trg.corners[j]));
 			if(val > maxval) {
 				maxval = val;
 				maxval_i = i;
@@ -80,14 +80,28 @@ static void add_subdivided_triangle(
 	(*output)[(*count) - 1] = trg;
 }
 
-size_t read_triangles_from_file(
-	const char* filename,
-	double edge_length_limit,
+size_t subdivide_triangles(
+	triangle* trgs,
+	size_t trgcount,
+	float edge_length_limit,
 	triangle** output
 ) {
-	if(edge_length_limit < 0.0) edge_length_limit = 0.0;
-	double edge_length_limit2 = edge_length_limit * edge_length_limit;
+	float edge_length_limit2 = edge_length_limit * edge_length_limit;
 	
+	size_t count = 0;
+	size_t allocated = 1;
+	*output = checked_malloc2(allocated, sizeof(triangle));
+	
+	for(size_t i = 0; i < trgcount; ++i) {
+		add_subdivided_triangle(
+			trgs[i], edge_length_limit2, output, &count, &allocated
+		);
+	}
+	
+	return count;
+}
+
+size_t read_triangles_from_file(const char* filename, triangle** output) {
 	FILE* fp = fopen(filename, "r");
 	if(!fp) fail("Could not open triangle input file '%s'.", filename);
 	
@@ -101,7 +115,7 @@ size_t read_triangles_from_file(
 		trg.radiosity = 0.0;
 		errno = 0;
 		int read = fscanf(
-			fp, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+			fp, "%f %f %f %f %f %f %f %f %f %f %f",
 			&trg.corners[0].x, &trg.corners[0].y, &trg.corners[0].z,
 			&trg.corners[1].x, &trg.corners[1].y, &trg.corners[1].z,
 			&trg.corners[2].x, &trg.corners[2].y, &trg.corners[2].z,
@@ -111,9 +125,14 @@ size_t read_triangles_from_file(
 		if(read != 11) {
 			fail("Error reading input file.");
 		}
-		add_subdivided_triangle(
-			trg, edge_length_limit2, output, &count, &allocated
-		);
+		
+		++count;
+		while(count > allocated) {
+			allocated *= 2;
+			*output = checked_realloc2(*output, allocated, sizeof(triangle));
+		}
+		
+		(*output)[count - 1] = trg;
 	}
 	
 	fclose(fp);

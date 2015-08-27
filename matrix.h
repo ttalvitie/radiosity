@@ -3,16 +3,16 @@
 
 #include "common.h"
 
-/// Vector of doubles. Allocate with create_vector(), free with free_vector().
+/// Vector of floats. Allocate with create_vector(), free with free_vector().
 typedef struct {
 	/// Number of elements in the vector.
 	size_t size;
 	
 	/// The array of elements of the vector.
-	double* data;
+	float* data;
 } vector;
 
-/// Square matrix of doubles. Allocate with create_matrix(), free with
+/// Square matrix of floats. Allocate with create_matrix(), free with
 /// free_matrix().
 typedef struct {
 	/// Number of elements in each row and column of the vector.
@@ -20,7 +20,7 @@ typedef struct {
 	
 	/// The array of elements of the matrix. The element (\p i, \p j) is stored
 	/// in position \p size * \p i + \p j
-	double* data;
+	float* data;
 } matrix;
 
 /// Allocates a vector.

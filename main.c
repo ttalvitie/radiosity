@@ -6,10 +6,10 @@
 
 #include <errno.h>
 
-static double param_to_double(const char* s) {
+static float param_to_float(const char* s) {
 	errno = 0;
 	char* endptr;
-	double ret = strtod(s, &endptr);
+	float ret = strtod(s, &endptr);
 	if(errno || *endptr != '\0') {
 		fail("Invalid real number argument '%s'.", s);
 	}
@@ -18,23 +18,23 @@ static double param_to_double(const char* s) {
 
 static void apply_transform(
 	triangle* trgs, size_t trgcount,
-	double x, double y, double z,
-	double yaw, double pitch, double roll
+	float x, float y, float z,
+	float yaw, float pitch, float roll
 ) {
-	double a = yaw;
-	double yaw_matrix_data[] = {
+	float a = yaw;
+	float yaw_matrix_data[] = {
 		 cos(a),     0.0,  sin(a),
 		    0.0,     1.0,     0.0,
 		-sin(a),     0.0,  cos(a)
 	};
 	a = pitch;
-	double pitch_matrix_data[] = {
+	float pitch_matrix_data[] = {
 		    1.0,     0.0,     0.0,
 		    0.0,  cos(a), -sin(a),
 		    0.0,  sin(a),  cos(a)
 	};
 	a = roll;
-	double roll_matrix_data[] = {
+	float roll_matrix_data[] = {
 		 cos(a), -sin(a),     0.0,
 		 sin(a),  cos(a),     0.0,
 		    0.0,     0.0,     1.0
@@ -50,11 +50,11 @@ static void apply_transform(
 	roll_matrix.size = 3;
 	roll_matrix.data = roll_matrix_data;
 	
-	double pos1_data[3];
+	float pos1_data[3];
 	vector pos1;
 	pos1.size = 3;
 	pos1.data = pos1_data;
-	double pos2_data[3];
+	float pos2_data[3];
 	vector pos2;
 	pos2.size = 3;
 	pos2.data = pos2_data;
@@ -86,33 +86,39 @@ int main(int argc, char* argv[]) {
 		);
 	}
 	
-	double edge_length_limit = param_to_double(argv[3]);
-	double camera_x = param_to_double(argv[4]);
-	double camera_y = param_to_double(argv[5]);
-	double camera_z = param_to_double(argv[6]);
-	double camera_yaw = PI * param_to_double(argv[7]) / 180.0;
-	double camera_pitch = PI * param_to_double(argv[8]) / 180.0;
-	double camera_roll = PI * param_to_double(argv[9]) / 180.0;
+	float edge_length_limit = param_to_float(argv[3]);
+	float camera_x = param_to_float(argv[4]);
+	float camera_y = param_to_float(argv[5]);
+	float camera_z = param_to_float(argv[6]);
+	float camera_yaw = PI * param_to_float(argv[7]) / 180.0;
+	float camera_pitch = PI * param_to_float(argv[8]) / 180.0;
+	float camera_roll = PI * param_to_float(argv[9]) / 180.0;
 	
-	triangle* trgs;
-	size_t trgcount;
-	trgcount = read_triangles_from_file(argv[1], edge_length_limit, &trgs);
+	triangle* orig_trgs;
+	size_t orig_trgcount;
+	orig_trgcount = read_triangles_from_file(argv[1], &orig_trgs);
 	
 	// To accomplish the right camera angle, we transform all vertices such that
 	// the camera is in (0, 0, 0) facing towards the positive z-axis.
 	apply_transform(
-		trgs, trgcount,
+		orig_trgs, orig_trgcount,
 		-camera_x, -camera_y, -camera_z,
 		camera_yaw, camera_pitch, camera_roll
 	);
 	
-	printf("Read %zu triangles", trgcount);
-	if(edge_length_limit > 0.0) {
-		printf(" (using edge length limit %lf)", edge_length_limit);
-	}
-	printf("\n");
+	triangle* trgs;
+	size_t trgcount;
+	trgcount = subdivide_triangles(
+		orig_trgs, orig_trgcount, edge_length_limit, &trgs
+	);
 	
-	compute_radiosity(trgs, trgcount);
+	printf(
+		"Read %zu triangles, subdivided to %zu triangles using edge length "
+		"limit %f.\n",
+		orig_trgcount, trgcount, edge_length_limit
+	);
+	
+	compute_radiosity(trgs, trgcount, orig_trgs, orig_trgcount);
 	
 	normalize_triangle_radiosities(trgs, trgcount);
 	draw_to_svg(argv[2], trgs, trgcount);

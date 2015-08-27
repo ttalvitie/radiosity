@@ -3,7 +3,7 @@
 
 #define PI 3.14159265358979323846
 
-double x, y, z, ref, emi;
+float x, y, z, ref, emi;
 int inv;
 
 void reset() {
@@ -16,9 +16,9 @@ void reset() {
 }
 
 void trg(
-	double x1, double y1, double z1,
-	double x2, double y2, double z2,
-	double x3, double y3, double z3
+	float x1, float y1, float z1,
+	float x2, float y2, float z2,
+	float x3, float y3, float z3
 ) {
 	if(x1 == x2 && y1 == y2 && z1 == z2) return;
 	if(x1 == x3 && y1 == y3 && z1 == z3) return;
@@ -29,36 +29,36 @@ void trg(
 	x3 += x; y3 += y; z3 += z;
 	if(inv) {
 		printf(
-			"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf\n",
+			"%f %f %f %f %f %f %f %f %f %f %f\n",
 			x1, y1, z1, x3, y3, z3, x2, y2, z2, ref, emi
 		);
 	} else {
 		printf(
-			"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf\n",
+			"%f %f %f %f %f %f %f %f %f %f %f\n",
 			x1, y1, z1, x2, y2, z2, x3, y3, z3, ref, emi
 		);
 	}
 }
 void quad(
-	double x1, double y1, double z1,
-	double x2, double y2, double z2,
-	double x3, double y3, double z3,
-	double x4, double y4, double z4
+	float x1, float y1, float z1,
+	float x2, float y2, float z2,
+	float x3, float y3, float z3,
+	float x4, float y4, float z4
 ) {
 	trg(x1, y1, z1, x2, y2, z2, x3, y3, z3);
 	trg(x1, y1, z1, x3, y3, z3, x4, y4, z4);
 }
 
-void sphere(double r, int detail) {
+void sphere(float r, int detail) {
 	for(int i = 0; i < detail; ++i) {
-		double a = r * sin(PI * ((double)i / (double)detail - 0.5));
-		double b = r * sin(PI * ((double)(i + 1) / (double)detail - 0.5));
-		double ra = sqrt(r * r - a * a);
-		double rb = sqrt(r * r - b * b);
+		float a = r * sin(PI * ((float)i / (float)detail - 0.5));
+		float b = r * sin(PI * ((float)(i + 1) / (float)detail - 0.5));
+		float ra = sqrt(r * r - a * a);
+		float rb = sqrt(r * r - b * b);
 		
 		for(int j = 0; j < detail; ++j) {
-			double p = 2.0 * PI * (double)j / (double)detail;
-			double q = 2.0 * PI * (double)(j + 1) / (double)detail;
+			float p = 2.0 * PI * (float)j / (float)detail;
+			float q = 2.0 * PI * (float)(j + 1) / (float)detail;
 			
 			quad(
 				ra * cos(p), a, ra * sin(p),
@@ -71,16 +71,16 @@ void sphere(double r, int detail) {
 	}
 }
 // Half where x < 0 for sphere().
-void halfsphere(double r, int detail) {
+void halfsphere(float r, int detail) {
 	for(int i = 0; i < detail; ++i) {
-		double a = r * sin(PI * ((double)i / (double)detail - 0.5));
-		double b = r * sin(PI * ((double)(i + 1) / (double)detail - 0.5));
-		double ra = sqrt(r * r - a * a);
-		double rb = sqrt(r * r - b * b);
+		float a = r * sin(PI * ((float)i / (float)detail - 0.5));
+		float b = r * sin(PI * ((float)(i + 1) / (float)detail - 0.5));
+		float ra = sqrt(r * r - a * a);
+		float rb = sqrt(r * r - b * b);
 		
 		for(int j = 0; j < detail; ++j) {
-			double p = 0.5 * PI + PI * (double)j / (double)detail;
-			double q = 0.5 * PI + PI * (double)(j + 1) / (double)detail;
+			float p = 0.5 * PI + PI * (float)j / (float)detail;
+			float q = 0.5 * PI + PI * (float)(j + 1) / (float)detail;
 			quad(
 				ra * cos(p), a, ra * sin(p),
 				ra * cos(q), a, ra * sin(q),
@@ -91,14 +91,14 @@ void halfsphere(double r, int detail) {
 		
 	}
 }
-void y_cylinder(double r, double h, int detail, int levels) {
+void y_cylinder(float r, float h, int detail, int levels) {
 	for(int i = 0; i < levels; ++i) {
-		double a = (double)i / (double)levels;
-		double b = (double)(i + 1) / (double)levels;
+		float a = (float)i / (float)levels;
+		float b = (float)(i + 1) / (float)levels;
 		
 		for(int j = 0; j < detail; ++j) {
-			double p = 2.0 * PI * (double)j / (double)detail;
-			double q = 2.0 * PI * (double)(j + 1) / (double)detail;
+			float p = 2.0 * PI * (float)j / (float)detail;
+			float q = 2.0 * PI * (float)(j + 1) / (float)detail;
 			quad(
 				r * cos(p), a * h, r * sin(p),
 				r * cos(q), a * h, r * sin(q),
@@ -109,7 +109,7 @@ void y_cylinder(double r, double h, int detail, int levels) {
 	}
 }
 
-void box(double a, double b, double c) {
+void box(float a, float b, float c) {
 	quad(
 		a, b, c,
 		-a, b, c,
@@ -187,14 +187,14 @@ int main() {
 	emi = 1;
 	y = 0.775;
 	x = -0.2;
-	sphere(0.075, 16);
+	sphere(0.075, 10);
 	
 	// Lamp bar
 	reset();
 	ref = 0.3;
 	y = 0.85;
 	x = -0.2;
-	y_cylinder(0.005, 0.15, 10, 6);
+	y_cylinder(0.005, 0.15, 6, 6);
 	
 	// Wall lamp
 	reset();
@@ -208,13 +208,13 @@ int main() {
 	reset();
 	x = -0.5;
 	z = -0.3;
-	y_cylinder(0.02, 0.35, 10, 6);
+	y_cylinder(0.02, 0.35, 6, 6);
 	x = -x;
-	y_cylinder(0.02, 0.35, 10, 6);
+	y_cylinder(0.02, 0.35, 6, 6);
 	z = -z;
-	y_cylinder(0.02, 0.35, 10, 6);
+	y_cylinder(0.02, 0.35, 6, 6);
 	x = -x;
-	y_cylinder(0.02, 0.35, 10, 6);
+	y_cylinder(0.02, 0.35, 6, 6);
 	
 	// Table
 	reset();
