@@ -1,6 +1,6 @@
 #include "common.h"
 #include "triangle.h"
-#include "draw_svg.h"
+#include "draw_bmp.h"
 #include "radiosity.h"
 #include "matrix.h"
 
@@ -79,7 +79,7 @@ static void apply_transform(
 int main(int argc, char* argv[]) {
 	if(argc != 10) {
 		fail(
-			"Usage: ./radiosity <input filename> <SVG output filename> "
+			"Usage: ./radiosity <input filename> <BMP output filename> "
 			"<edge length limit used in triangle subdivision>"
 			"<camera x> <camera y> <camera z> "
 			"<camera yaw> <camera pitch> <camera roll> "
@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
 	compute_radiosity(trgs, trgcount, orig_trgs, orig_trgcount);
 	
 	normalize_triangle_radiosities(trgs, trgcount);
-	draw_to_svg(argv[2], trgs, trgcount);
+	draw_to_bmp(argv[2], trgs, trgcount);
 	
 	free(orig_trgs);
 	free(trgs);

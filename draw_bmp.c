@@ -1,6 +1,10 @@
-#include "draw_svg.h"
+#include "draw_bmp.h"
 
-static void draw_triangle(FILE* fp, triangle trg) {
+#include "bmp.h"
+
+static void draw_triangle(
+	bmp_canvas canvas, triangle trg, float wd, float hd, float coef
+) {
 	// Determine pixel color by radiosity.
 	int color;
 	if(vec3_dot(triangle_normal(trg), trg.corners[0]) < 0.0) {
@@ -26,7 +30,8 @@ static void draw_triangle(FILE* fp, triangle trg) {
 			double xs[10];
 			double ys[10];
 			
-			// Draw all vertices of the triangle, projected to 3D.
+			// Draw the triangle, projected to 3D.
+			
 			xs[vertcount] = a.x / a.z;
 			ys[vertcount] = a.y / a.z;
 			++vertcount;
@@ -62,27 +67,15 @@ static void draw_triangle(FILE* fp, triangle trg) {
 				a = b;
 			}
 			
-			// Draw interior.
-			fprintf(fp, "<polygon points=\"");
-			for(size_t vert = 0; vert < vertcount; ++vert) {
-				if(vert != 0) fprintf(fp, " ");
-				fprintf(fp, "%f,%f", xs[vert], ys[vert]);
-			}
-			fprintf(fp,
-				"\" fill=\"rgb(%d, %d, %d)\" stroke=\"none\" />\n",
-				color, color, color
-			);
-			
-			// Stroke only right-facing edges.
-			for(size_t v1 = 0; v1 < vertcount; ++v1) {
-				size_t v2 = (v1 + 1) % vertcount;
-				if(ys[v1] < ys[v2] || (ys[v1] == ys[v2] && xs[v1] < xs[v2])) {
-					fprintf(fp,
-						"<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" "
-						"stroke=\"rgb(%d, %d, %d)\" />",
-						xs[v1], ys[v1], xs[v2], ys[v2], color, color, color
-					);
-				}
+			// Draw the polygon we have constructed to (xs, ys) to the canvas.
+			for(size_t i = 2; i < vertcount; ++i) {
+				bmp_draw(
+					canvas, 
+					0.5 * wd + coef * xs[0], 0.5 * hd + coef * ys[0],
+					0.5 * wd + coef * xs[1], 0.5 * hd + coef * ys[1],
+					0.5 * wd + coef * xs[i], 0.5 * hd + coef * ys[i],
+					color, color, color
+				);
 			}
 			
 			break;
@@ -103,34 +96,14 @@ int triangle_distance_cmp(const void* a, const void* b) {
 	return -1;
 }
 
-void draw_to_svg(const char* filename, triangle* trgs, size_t trgcount) {
-	FILE* fp = fopen(filename, "w");
-	if(!fp) fail("Could not open SVG output file '%s'.", filename);
-	
-	int w = 1280;
-	int h = 720;
+void draw_to_bmp(const char* filename, triangle* trgs, size_t trgcount) {
+	size_t w = 2560;
+	size_t h = 1440;
 	float wd = w;
 	float hd = h;
 	float fov = 40;
-	
-	fprintf(fp,
-		 "<svg xmlns=\"http://www.w3.org/2000/svg\" "
-		 "width=\"%d\" height=\"%d\">\n",
-		 w, h
-	);
-	fprintf(fp,
-		 "<polygon points=\"0,0 %d,0 %d,%d 0,%d\" fill=\"black\" "
-		 "stroke=\"black\" />\n",
-		 w, w, h, h
-	);
-	fprintf(fp, "<g transform=\"scale(1, -1)\">\n");
-	fprintf(fp, "<g transform=\"translate(%f, %f)\">\n", 0.5 * wd, -0.5 * hd);
-	float coef = 0.5 * wd / tan(PI * fov / 180.0);
-	fprintf(fp,
-		"<g transform=\"scale(%f)\" stroke-width=\"%f\" "
-		"stroke-linecap=\"round\">\n",
-		coef, 0.3 / coef
-	);
+
+	bmp_canvas canvas = bmp_start(w, h);
 	
 	// Use painter's method: order the triangles from the farthest to the
 	// closest. We use the farthest corner of the triangle as the distance
@@ -150,16 +123,12 @@ void draw_to_svg(const char* filename, triangle* trgs, size_t trgcount) {
 	
 	qsort(trgdists, trgcount, sizeof(triangle_distance), triangle_distance_cmp);
 	
+	float coef = 0.5 * wd / tan(PI * fov / 180.0);
 	for(size_t i = 0; i < trgcount; ++i) {
-		draw_triangle(fp, trgs[trgdists[i].index]);
+		draw_triangle(canvas, trgs[trgdists[i].index], wd, hd, coef);
 	}
 	
 	free(trgdists);
 	
-	fprintf(fp, "</g>\n");
-	fprintf(fp, "</g>\n");
-	fprintf(fp, "</g>\n");
-	fprintf(fp, "</svg>\n");
-	
-	fclose(fp);
+	bmp_write(canvas, filename);
 }
