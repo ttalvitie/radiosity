@@ -91,21 +91,16 @@ void halfsphere(float r, int detail) {
 		
 	}
 }
-void y_cylinder(float r, float h, int detail, int levels) {
-	for(int i = 0; i < levels; ++i) {
-		float a = (float)i / (float)levels;
-		float b = (float)(i + 1) / (float)levels;
-		
-		for(int j = 0; j < detail; ++j) {
-			float p = 2.0 * PI * (float)j / (float)detail;
-			float q = 2.0 * PI * (float)(j + 1) / (float)detail;
-			quad(
-				r * cos(p), a * h, r * sin(p),
-				r * cos(q), a * h, r * sin(q),
-				r * cos(q), b * h, r * sin(q),
-				r * cos(p), b * h, r * sin(p)
-			);
-		}
+void y_cylinder(float r, float h, int detail) {
+	for(int j = 0; j < detail; ++j) {
+		float p = 2.0 * PI * (float)j / (float)detail;
+		float q = 2.0 * PI * (float)(j + 1) / (float)detail;
+		quad(
+			r * cos(p), 0.0, r * sin(p),
+			r * cos(q), 0.0, r * sin(q),
+			r * cos(q), h, r * sin(q),
+			r * cos(p), h, r * sin(p)
+		);
 	}
 }
 
@@ -194,7 +189,7 @@ int main() {
 	ref = 0.3;
 	y = 0.85;
 	x = -0.2;
-	y_cylinder(0.005, 0.15, 6, 6);
+	y_cylinder(0.005, 0.15, 10);
 	
 	// Wall lamp
 	reset();
@@ -208,13 +203,13 @@ int main() {
 	reset();
 	x = -0.5;
 	z = -0.3;
-	y_cylinder(0.02, 0.35, 6, 6);
+	y_cylinder(0.02, 0.35, 16);
 	x = -x;
-	y_cylinder(0.02, 0.35, 6, 6);
+	y_cylinder(0.02, 0.35, 16);
 	z = -z;
-	y_cylinder(0.02, 0.35, 6, 6);
+	y_cylinder(0.02, 0.35, 16);
 	x = -x;
-	y_cylinder(0.02, 0.35, 6, 6);
+	y_cylinder(0.02, 0.35, 16);
 	
 	// Table
 	reset();

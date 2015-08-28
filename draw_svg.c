@@ -22,10 +22,15 @@ static void draw_triangle(FILE* fp, triangle trg) {
 	for(int i = 0; i < 3; ++i) {
 		vec3 a = trg.corners[i];
 		if(a.z > 0) {
-			fprintf(fp, "<polygon points=\"");
+			size_t vertcount = 0;
+			double xs[10];
+			double ys[10];
 			
 			// Draw all vertices of the triangle, projected to 3D.
-			fprintf(fp, "%f,%f", a.x / a.z, a.y / a.z);
+			xs[vertcount] = a.x / a.z;
+			ys[vertcount] = a.y / a.z;
+			++vertcount;
+			
 			for(int j = 1; j <= 3; ++j) {
 				int p = (i + j) % 3;
 				vec3 b = trg.corners[p];
@@ -43,20 +48,42 @@ static void draw_triangle(FILE* fp, triangle trg) {
 						x *= coef;
 						y *= coef;
 					}
-					fprintf(fp, " %f,%f", x, y);
+					xs[vertcount] = x;
+					ys[vertcount] = y;
+					++vertcount;
 				}
 				
 				if(b.z > 0.0) {
-					fprintf(fp, " %f,%f", b.x / b.z, b.y / b.z);
+					xs[vertcount] = b.x / b.z;
+					ys[vertcount] = b.y / b.z;
+					++vertcount;
 				}
 				
 				a = b;
 			}
 			
+			// Draw interior.
+			fprintf(fp, "<polygon points=\"");
+			for(size_t vert = 0; vert < vertcount; ++vert) {
+				if(vert != 0) fprintf(fp, " ");
+				fprintf(fp, "%f,%f", xs[vert], ys[vert]);
+			}
 			fprintf(fp,
-				"\" fill=\"rgb(%d, %d, %d)\" stroke=\"rgb(%d, %d, %d)\" />\n",
-				color, color, color, color, color, color
+				"\" fill=\"rgb(%d, %d, %d)\" stroke=\"none\" />\n",
+				color, color, color
 			);
+			
+			// Stroke only right-facing edges.
+			for(size_t v1 = 0; v1 < vertcount; ++v1) {
+				size_t v2 = (v1 + 1) % vertcount;
+				if(ys[v1] < ys[v2] || (ys[v1] == ys[v2] && xs[v1] < xs[v2])) {
+					fprintf(fp,
+						"<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" "
+						"stroke=\"rgb(%d, %d, %d)\" />",
+						xs[v1], ys[v1], xs[v2], ys[v2], color, color, color
+					);
+				}
+			}
 			
 			break;
 		}
@@ -93,7 +120,7 @@ void draw_to_svg(const char* filename, triangle* trgs, size_t trgcount) {
 	);
 	fprintf(fp,
 		 "<polygon points=\"0,0 %d,0 %d,%d 0,%d\" fill=\"black\" "
-		 "stroke=\"black\" />",
+		 "stroke=\"black\" />\n",
 		 w, w, h, h
 	);
 	fprintf(fp, "<g transform=\"scale(1, -1)\">\n");
@@ -101,8 +128,8 @@ void draw_to_svg(const char* filename, triangle* trgs, size_t trgcount) {
 	float coef = 0.5 * wd / tan(PI * fov / 180.0);
 	fprintf(fp,
 		"<g transform=\"scale(%f)\" stroke-width=\"%f\" "
-		"stroke-linejoin=\"round\">\n",
-		coef, 1.2 / coef
+		"stroke-linecap=\"round\">\n",
+		coef, 0.3 / coef
 	);
 	
 	// Use painter's method: order the triangles from the farthest to the
