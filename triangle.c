@@ -50,8 +50,13 @@ static void add_subdivided_triangle(
 			int j = (i + 1) % 3;
 			int k = (j + 1) % 3;
 			
-			vec3 split = vec3_add(trg.corners[i], trg.corners[j]);
-			split = vec3_mul(split, 0.5);
+			// We don't split exactly at the center to have some nice randomness
+			// in the triangles.
+			double t = 0.4 + 0.2 * (double)rand() / (double)RAND_MAX;
+			vec3 split = vec3_add(
+				vec3_mul(trg.corners[i], 1.0 - t),
+				vec3_mul(trg.corners[j], t)
+			);
 			
 			trg1.corners[0] = split;
 			trg1.corners[1] = trg.corners[k];
