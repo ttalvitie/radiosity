@@ -48,7 +48,7 @@ static inline float triangle_area(triangle trg) {
 /// Checks whether the segment from \p a to \p b intersects triangle \p trg.
 static inline int segment_intersects_triangle(vec3 a, vec3 b, triangle trg) {
 	vec3 n = triangle_normal(trg);
-	vec3 c = triangle_centroid(trg);
+	vec3 c = trg.corners[0];
 	
 	float da = vec3_dot(vec3_sub(a, c), n);
 	float db = vec3_dot(vec3_sub(b, c), n);
@@ -59,17 +59,15 @@ static inline int segment_intersects_triangle(vec3 a, vec3 b, triangle trg) {
 	
 	vec3 v = vec3_add(vec3_mul(a, 1.0 - t), vec3_mul(b, t));
 	
-	float whole_area = triangle_area(trg);
-	float subs_area = 0.0;
-	
 	triangle subtrg = trg;
 	
 	for(int i = 0; i < 3; ++i) {
 		subtrg.corners[i] = v;
-		subs_area += triangle_area(subtrg);
+		vec3 n2 = triangle_normal(subtrg);
+		if(vec3_dot(n, n2) < 0.0) return 0;
 		subtrg.corners[i] = trg.corners[i];
 	}
-	return subs_area / whole_area < 1.0 + 1e-4;
+	return 1;
 }
 
 /// Normalize the radiosity values of all triangles in an array to the range
