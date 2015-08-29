@@ -25,6 +25,12 @@ bmp_canvas bmp_start(size_t width, size_t height) {
 	return canvas;
 }
 
+static inline void checked_fputc(int c, FILE* stream) {
+	if(fputc(c, stream) == EOF) {
+		fail("Could not write BMP file: checked_fputc() failed.");
+	}
+}
+
 void bmp_write(bmp_canvas canvas, const char* filename) {
 	FILE* fp = fopen(filename, "wb");
 	if(!fp) fail("Failed to open output BMP file '%s' for writing.", filename);
@@ -32,8 +38,8 @@ void bmp_write(bmp_canvas canvas, const char* filename) {
 	// Write header.
 	
 	// ID
-	fputc(0x42, fp);
-	fputc(0x4D, fp);
+	checked_fputc(0x42, fp);
+	checked_fputc(0x4D, fp);
 	
 	// Size
 	uint32_t tmp_u32 = canvas.size;
@@ -41,89 +47,91 @@ void bmp_write(bmp_canvas canvas, const char* filename) {
 	tmp_u32 += 54;
 	if(tmp_u32 < 54) fail("bmp_write: Image too large.");
 	for(int i = 0; i < 4; ++i) {
-		fputc(tmp_u32 & (uint32_t)0xFF, fp);
+		checked_fputc(tmp_u32 & (uint32_t)0xFF, fp);
 		tmp_u32 >>= 8;
 	}
 	
 	// Unused
-	fputc(0, fp);
-	fputc(0, fp);
-	fputc(0, fp);
-	fputc(0, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0, fp);
 	
 	// Pixel data offset (54 bytes = header size).
-	fputc(54, fp);
-	fputc(0, fp);
-	fputc(0, fp);
-	fputc(0, fp);
+	checked_fputc(54, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0, fp);
 	
 	// DIB header size (40 bytes)
-	fputc(40, fp);
-	fputc(0, fp);
-	fputc(0, fp);
-	fputc(0, fp);
+	checked_fputc(40, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0, fp);
 	
 	// Width
 	tmp_u32 = canvas.width;
 	for(int i = 0; i < 4; ++i) {
-		fputc(tmp_u32 & (uint32_t)0xFF, fp);
+		checked_fputc(tmp_u32 & (uint32_t)0xFF, fp);
 		tmp_u32 >>= 8;
 	}
 	
 	// Height
 	tmp_u32 = canvas.height;
 	for(int i = 0; i < 4; ++i) {
-		fputc(tmp_u32 & (uint32_t)0xFF, fp);
+		checked_fputc(tmp_u32 & (uint32_t)0xFF, fp);
 		tmp_u32 >>= 8;
 	}
 	
 	// Color plane count (1).
-	fputc(1, fp);
-	fputc(0, fp);
+	checked_fputc(1, fp);
+	checked_fputc(0, fp);
 	
 	// Bits per pixel (24).
-	fputc(24, fp);
-	fputc(0, fp);
+	checked_fputc(24, fp);
+	checked_fputc(0, fp);
 	
 	// No compression
-	fputc(0, fp);
-	fputc(0, fp);
-	fputc(0, fp);
-	fputc(0, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0, fp);
 	
 	// Size of the bitmap data.
 	tmp_u32 = canvas.size;
 	for(int i = 0; i < 4; ++i) {
-		fputc(tmp_u32 & (uint32_t)0xFF, fp);
+		checked_fputc(tmp_u32 & (uint32_t)0xFF, fp);
 		tmp_u32 >>= 8;
 	}
 	
 	// 72 DPI
-	fputc(0x13, fp);
-	fputc(0x0B, fp);
-	fputc(0, fp);
-	fputc(0, fp);
-	fputc(0x13, fp);
-	fputc(0x0B, fp);
-	fputc(0, fp);
-	fputc(0, fp);
+	checked_fputc(0x13, fp);
+	checked_fputc(0x0B, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0x13, fp);
+	checked_fputc(0x0B, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0, fp);
 	
 	// Palette size (0)
-	fputc(0, fp);
-	fputc(0, fp);
-	fputc(0, fp);
-	fputc(0, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0, fp);
 	
 	// Number of important colors in palette (0)
-	fputc(0, fp);
-	fputc(0, fp);
-	fputc(0, fp);
-	fputc(0, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0, fp);
+	checked_fputc(0, fp);
 	
 	// Image data
-	fwrite(canvas.data, 1, canvas.size, fp);
+	if(fwrite(canvas.data, 1, canvas.size, fp) != canvas.size) {
+		fail("Could not write image data to BMP output file.");
+	}
 	
-	fclose(fp);
+	if(fclose(fp)) fail("Could not close BMP output file.");
 	
 	free(canvas.data);
 }
