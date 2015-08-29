@@ -2,6 +2,7 @@
 
 #ifdef LARGE_MATRIX_TMPFILE_TEMPLATE
 #include <sys/mman.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <string.h>
 #endif
@@ -45,18 +46,15 @@ matrix create_matrix(size_t size) {
 		bytes *= sizeof(float);
 		
 		// Enlarge the file to have the right size.
-		char zeros[4096] = {0};
-		size_t written = 0;
-		while(1) {
-			if(write(fd, zeros, 4096) == -1) {
-				fail("Could not write to temporary file for a large matrix.");
-			}
-			size_t old_written = written;
-			written += 4096;
-			if(written > bytes || written <= old_written) break;
+		if(lseek(fd, bytes - 1, SEEK_SET) != bytes - 1) {
+			fail("Could not lseek() in a temporary file for a large matrix.");
 		}
-		if(fsync(fd)) fail("Could not fsync temporary file for a large matrix.");
-		
+		char c = '\0';
+		if(write(fd, &c, 1) != 1) {
+			fail("Could not write() to a temporary file for a large matrix.");
+		}
+		if(fsync(fd)) fail("Could not fsync() temporary file for a large matrix.");
+
 		// Create memory mapping.
 		ret.data = mmap(NULL, bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 		if(ret.data == MAP_FAILED) {
