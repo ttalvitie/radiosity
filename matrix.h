@@ -21,6 +21,10 @@ typedef struct {
 	/// The array of elements of the matrix. The element (\p i, \p j) is stored
 	/// in position \p size * \p i + \p j
 	float* data;
+	
+#ifdef LARGE_MATRIX_TMPFILE_TEMPLATE
+	char* tmpfilename;
+#endif
 } matrix;
 
 /// Allocates a vector.
