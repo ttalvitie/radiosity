@@ -344,16 +344,16 @@ int main() {
 	
 	// Lamp
 	emi = 1;
-	y = 0.775;
-	x = -0.2;
+	y = 0.725;
+	x = -0.3;
 	sphere(0.075, 10);
 	
 	// Lamp bar
 	reset();
 	ref = 0.3;
-	y = 0.85;
-	x = -0.2;
-	y_cylinder(0.005, 0.15, 10);
+	y = 0.8;
+	x = -0.3;
+	y_cylinder(0.005, 0.2, 10);
 	
 	// Table legs
 	reset();
