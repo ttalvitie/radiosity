@@ -6,6 +6,18 @@
 #include <pthread.h>
 #endif
 
+/// Samples a point from triangle \p trg using parameters \p u, \p v. To get
+/// points inside the triangle, it should hold that u, v >= 0 and u + v <= 1.
+static inline vec3 triangle_point(triangle trg, float u, float v) {
+	return vec3_add(
+		trg.corners[0],
+		vec3_add(
+			vec3_mul(vec3_sub(trg.corners[1], trg.corners[0]), u),
+			vec3_mul(vec3_sub(trg.corners[2], trg.corners[0]), v)
+		)
+	);
+}
+
 static inline float radiosity_matrix_element(
 	triangle* trgs, size_t trgcount,
 	raycast raycast_ctx,
@@ -28,34 +40,45 @@ static inline float radiosity_matrix_element(
 	// If the centroids do not see each other, no light propagation.
 	if(raycast_query(raycast_ctx, ci, cj)) return 0.0;
 	
-	vec3 diff = vec3_sub(cj, ci);
-	float difflen = vec3_len(diff);
-	
 	vec3 ni = triangle_normal(trgs[i]);
 	vec3 nj = triangle_normal(trgs[j]);
 	
-	float cosi = vec3_dot(ni, diff) / (difflen * vec3_len(ni));
-	float cosj = -vec3_dot(nj, diff) / (difflen * vec3_len(nj));
+	float ni_len = vec3_len(ni);
+	float nj_len = vec3_len(nj);
 	
-	// If the triangles do not face each other, no light propagation.
-	if(cosi <= 0.0 || cosj <= 0.0) return 0.0;
+	// Sample some points from both triangles and use the average of the
+	// radiosity value for those points as the value for the triangles.
+	float val = 0.0;
 	
-	// Use a conservative distance estimate: average of
-	// distances between corners and distance between centroids.
-	float dist = 0.0;
-	for(int a = 0; a < 3; ++a) {
-		for(int b = 0; b < 3; ++b) {
-			vec3 ci = trgs[i].corners[a];
-			vec3 cj = trgs[j].corners[b];
-			dist += vec3_len(vec3_sub(ci, cj));
+/*	const int samplecnt = 4;
+	const float sample_u[] = {0.167, 0.333, 0.667, 0.167};
+	const float sample_v[] = {0.167, 0.333, 0.167, 0.667};
+*/	
+	const int samplecnt = 9;
+	const float sample_u[] = {0.111, 0.222, 0.444, 0.555, 0.777, 0.111, 0.222, 0.444, 0.111};
+	const float sample_v[] = {0.111, 0.222, 0.111, 0.222, 0.111, 0.444, 0.555, 0.444, 0.777};
+	
+	for(int si = 0; si < samplecnt; ++si) {
+		vec3 vi = triangle_point(trgs[i], sample_u[si], sample_v[si]);
+		for(int sj = 0; sj < samplecnt; ++sj) {
+			vec3 vj = triangle_point(trgs[j], sample_u[sj], sample_v[sj]);
+			
+			vec3 diff = vec3_sub(vj, vi);
+			float difflen = vec3_len(diff);
+			
+			float cosi = vec3_dot(ni, diff) / (difflen * ni_len);
+			float cosj = -vec3_dot(nj, diff) / (difflen * nj_len);
+			
+			// If the triangles do not face each other, no light propagation.
+			if(cosi <= 0.0 || cosj <= 0.0) continue;
+			
+			float term = trgs[i].reflectivity * cosi * cosj;
+			term /= PI * difflen * difflen;
+			val += term;
 		}
 	}
-	dist /= 9.0;
-	dist = 0.25 * dist + 0.75 * difflen;
-	
-	float val = trgs[i].reflectivity * cosi * cosj;
+	val /= (float)samplecnt * (float)samplecnt;
 	val *= triangle_area(trgs[j]);
-	val /= PI * dist * dist;
 	
 	if(isnan(val)) {
 		fail(
