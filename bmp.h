@@ -1,3 +1,4 @@
+/// @file
 #pragma once
 
 #include "common.h"
@@ -5,7 +6,7 @@
 
 /// A context for drawing a set of triangles and creating a BMP image out of
 /// them. Create with bmp_start(), draw triangles with bmp_draw() and finalize
-/// with bmp_write(). Do not access directly.
+/// with bmp_write(). Do not access the structure directly.
 typedef struct {
 	size_t width;
 	size_t height;
@@ -14,7 +15,7 @@ typedef struct {
 	uint8_t* data;
 } bmp_canvas;
 
-/// Create BMP canvasing context.
+/// Create a BMP context.
 /// \param width Width of the image.
 /// \param height Height of the image.
 bmp_canvas bmp_start(size_t width, size_t height);

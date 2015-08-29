@@ -3,6 +3,7 @@
 #include "draw_bmp.h"
 #include "radiosity.h"
 #include "matrix.h"
+#include "raycast.h"
 
 #include <errno.h>
 
@@ -112,17 +113,20 @@ int main(int argc, char* argv[]) {
 		orig_trgs, orig_trgcount, edge_length_limit, &trgs
 	);
 	
+	raycast raycast_ctx = raycast_init(orig_trgs, orig_trgcount);
+	
 	printf(
 		"Read %zu triangles, subdivided to %zu triangles using edge length "
 		"limit %f.\n",
 		orig_trgcount, trgcount, edge_length_limit
 	);
 	
-	compute_radiosity(trgs, trgcount, orig_trgs, orig_trgcount);
+	compute_radiosity(trgs, trgcount, raycast_ctx);
 	
 	normalize_triangle_radiosities(trgs, trgcount);
 	draw_to_bmp(argv[2], trgs, trgcount);
 	
+	raycast_free(raycast_ctx);
 	free(orig_trgs);
 	free(trgs);
 	

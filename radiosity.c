@@ -8,7 +8,7 @@
 
 static inline float radiosity_matrix_element(
 	triangle* trgs, size_t trgcount,
-	triangle* collision_trgs, size_t collision_trgcount,
+	raycast raycast_ctx,
 	size_t i, size_t j
 ) {
 	if(j == trgcount) {
@@ -26,11 +26,7 @@ static inline float radiosity_matrix_element(
 	vec3 cj = triangle_centroid(trgs[j]);
 	
 	// If the centroids do not see each other, no light propagation.
-	for(size_t k = 0; k < collision_trgcount; ++k) {
-		if(segment_intersects_triangle(ci, cj, collision_trgs[k])) {
-			return 0.0;
-		}
-	}
+	if(raycast_query(raycast_ctx, ci, cj)) return 0.0;
 	
 	vec3 diff = vec3_sub(cj, ci);
 	float difflen = vec3_len(diff);
@@ -74,8 +70,7 @@ static inline float radiosity_matrix_element(
 typedef struct {
 	triangle* trgs;
 	size_t trgcount;
-	triangle* collision_trgs;
-	size_t collision_trgcount;
+	raycast raycast_ctx;
 	size_t next_percent;
 	size_t i;
 	matrix Y;
@@ -112,7 +107,7 @@ static void* matrix_worker(void* ptr) {
 		for(size_t j = 0; j <= job->trgcount; ++j) {
 			job->Y.data[Ypos++] = radiosity_matrix_element(
 				job->trgs, job->trgcount,
-				job->collision_trgs, job->collision_trgcount,
+				job->raycast_ctx,
 				i, j
 			);
 		}
@@ -122,7 +117,7 @@ static void* matrix_worker(void* ptr) {
 
 void compute_radiosity(
 	triangle* trgs, size_t trgcount,
-	triangle* collision_trgs, size_t collision_trgcount
+	raycast raycast_ctx
 ) {
 	// We solve radiosity B from the equation B = E + X B, where E is the
 	// emitted energy and X is the radiosity matrix. By augmenting the matrix
@@ -140,8 +135,7 @@ void compute_radiosity(
 	matrix_job job;
 	job.trgs = trgs;
 	job.trgcount = trgcount;
-	job.collision_trgs = collision_trgs;
-	job.collision_trgcount = collision_trgcount;
+	job.raycast_ctx = raycast_ctx;
 	job.next_percent = 0;
 	job.i = 0;
 	job.Y = Y;
