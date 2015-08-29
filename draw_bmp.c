@@ -13,7 +13,7 @@ static void draw_triangle(
 		if(radiosity > 1.0) radiosity = 1.0;
 		
 		// Gamma correction.
-		radiosity = pow(radiosity, 0.85);
+		radiosity = pow(radiosity, 0.8);
 		
 		color = floor(256 * radiosity);
 		if(color < 0) color = 0;

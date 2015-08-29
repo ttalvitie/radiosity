@@ -113,6 +113,14 @@ int main(int argc, char* argv[]) {
 		orig_trgs, orig_trgcount, edge_length_limit, &trgs
 	);
 	
+	// Shuffle the triangles so that progress meters works more accurately.
+	for(size_t i = 0; i < trgcount; ++i) {
+		size_t j = rand() % (i + 1);
+		triangle tmp = trgs[i];
+		trgs[i] = trgs[j];
+		trgs[j] = tmp;
+	}
+	
 	raycast raycast_ctx = raycast_init(orig_trgs, orig_trgcount);
 	
 	printf(

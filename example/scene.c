@@ -10,7 +10,7 @@ void reset() {
 	x = 0.0;
 	y = 0.0;
 	z = 0.0;
-	ref = 0.93;
+	ref = 0.97;
 	emi = 0.0;
 	inv = 0;
 }
@@ -166,16 +166,180 @@ int main() {
 		-1, 1, -1
 	);
 	quad(
-		1, 0, -1,
-		1, 1, -1,
-		1, 1, 1,
-		1, 0, 1
-	);
-	quad(
 		-1, 0, 1,
 		1, 0, 1,
 		1, 1, 1,
 		-1, 1, 1
+	);
+	
+	// Wall with hole
+	float holey1 = 0.3;
+	float holey2 = 0.95;
+	float holez1 = -0.2;
+	float holez2 = 0.5;
+	float holemy = 0.5 * (holey1 + holey2);
+	float holemz = 0.5 * (holez1 + holez2);
+	quad(
+		1, 0, -1,
+		1, 1, -1,
+		1, 1, holez1,
+		1, 0, holez1
+	);
+	quad(
+		1, 0, holez2,
+		1, 1, holez2,
+		1, 1, 1,
+		1, 0, 1
+	);
+	quad(
+		1, 0, holez1,
+		1, holey1, holez1,
+		1, holey1, holez2,
+		1, 0, holez2
+	);
+	quad(
+		1, holey2, holez1,
+		1, 1, holez1,
+		1, 1, holez2,
+		1, holey2, holez2
+	);
+	
+	float barsz = 0.02;
+	quad(
+		1, holey1, holemz - barsz,
+		1, holey2, holemz - barsz,
+		1, holey2, holemz + barsz,
+		1, holey1, holemz + barsz
+	);
+	quad(
+		1, holemy - barsz, holez1,
+		1, holemy + barsz, holez1,
+		1, holemy + barsz, holemz - barsz,
+		1, holemy - barsz, holemz - barsz
+	);
+	quad(
+		1, holemy - barsz, holemz + barsz,
+		1, holemy + barsz, holemz + barsz,
+		1, holemy + barsz, holez2,
+		1, holemy - barsz, holez2
+	);
+	
+	// Deepen window
+	double windepth = 0.04;
+	quad(
+		1, holey1, holez1,
+		1 + windepth, holey1, holez1,
+		1 + windepth, holey1, holemz - barsz,
+		1, holey1, holemz - barsz
+	);
+	quad(
+		1, holey1, holemz + barsz,
+		1 + windepth, holey1, holemz + barsz,
+		1 + windepth, holey1, holez2,
+		1, holey1, holez2
+	);
+	quad(
+		1, holemy + barsz, holez1,
+		1 + windepth, holemy + barsz, holez1,
+		1 + windepth, holemy + barsz, holemz - barsz,
+		1, holemy + barsz, holemz - barsz
+	);
+	quad(
+		1, holemy + barsz, holemz + barsz,
+		1 + windepth, holemy + barsz, holemz + barsz,
+		1 + windepth, holemy + barsz, holez2,
+		1, holemy + barsz, holez2
+	);
+	
+	inv = !inv;
+	quad(
+		1, holey2, holez1,
+		1 + windepth, holey2, holez1,
+		1 + windepth, holey2, holemz - barsz,
+		1, holey2, holemz - barsz
+	);
+	quad(
+		1, holey2, holemz + barsz,
+		1 + windepth, holey2, holemz + barsz,
+		1 + windepth, holey2, holez2,
+		1, holey2, holez2
+	);
+	quad(
+		1, holemy - barsz, holez1,
+		1 + windepth, holemy - barsz, holez1,
+		1 + windepth, holemy - barsz, holemz - barsz,
+		1, holemy - barsz, holemz - barsz
+	);
+	quad(
+		1, holemy - barsz, holemz + barsz,
+		1 + windepth, holemy - barsz, holemz + barsz,
+		1 + windepth, holemy - barsz, holez2,
+		1, holemy - barsz, holez2
+	);
+	inv = !inv;
+	
+	quad(
+		1, holey1, holez2,
+		1 + windepth, holey1, holez2,
+		1 + windepth, holemy - barsz, holez2,
+		1, holemy - barsz, holez2
+	);
+	quad(
+		1, holemy + barsz, holez2,
+		1 + windepth, holemy + barsz, holez2,
+		1 + windepth, holey2, holez2,
+		1, holey2, holez2
+	);
+	quad(
+		1, holey1, holemz - barsz,
+		1 + windepth, holey1, holemz - barsz,
+		1 + windepth, holemy - barsz, holemz - barsz,
+		1, holemy - barsz, holemz - barsz
+	);
+	quad(
+		1, holemy + barsz, holemz - barsz,
+		1 + windepth, holemy + barsz, holemz - barsz,
+		1 + windepth, holey2, holemz - barsz,
+		1, holey2, holemz - barsz
+	);
+	
+	inv = !inv;
+	quad(
+		1, holey1, holez1,
+		1 + windepth, holey1, holez1,
+		1 + windepth, holemy - barsz, holez1,
+		1, holemy - barsz, holez1
+	);
+	quad(
+		1, holemy + barsz, holez1,
+		1 + windepth, holemy + barsz, holez1,
+		1 + windepth, holey2, holez1,
+		1, holey2, holez1
+	);
+	quad(
+		1, holey1, holemz + barsz,
+		1 + windepth, holey1, holemz + barsz,
+		1 + windepth, holemy - barsz, holemz + barsz,
+		1, holemy - barsz, holemz + barsz
+	);
+	quad(
+		1, holemy + barsz, holemz + barsz,
+		1 + windepth, holemy + barsz, holemz + barsz,
+		1 + windepth, holey2, holemz + barsz,
+		1, holey2, holemz + barsz
+	);
+	inv = !inv;
+	
+	// Sun.
+	float sunsz = 1;
+	emi = 50.0 / (sunsz * sunsz);
+	float suny = 10;
+	float sunz = -1.0 + sunsz;
+	quad(
+		10, suny - sunsz, sunz - sunsz,
+		10, suny + sunsz, sunz - sunsz,
+		10, suny + sunsz, sunz + sunsz,
+		10, suny - sunsz, sunz + sunsz
 	);
 	
 	// Lamp
@@ -190,14 +354,6 @@ int main() {
 	y = 0.85;
 	x = -0.2;
 	y_cylinder(0.005, 0.15, 10);
-	
-	// Wall lamp
-	reset();
-	emi = 0.5;
-	x = 1;
-	y = 0.55;
-	z = -0.3;
-	halfsphere(0.05, 12);
 	
 	// Table legs
 	reset();
