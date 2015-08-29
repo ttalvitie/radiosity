@@ -185,19 +185,29 @@ void compute_radiosity(
 #endif
 	
 	// Iterate assignment B <- Y B.
-	for(int i = 0; i < 100; ++i) {
+	for(int i = 0; i < 500; ++i) {
 		matrix_vector_mul(Y, B, B2);
 		
 		vector tmp = B;
 		B = B2;
 		B2 = tmp;
 		
-		float asd = 0.0;
+		float maxch = 0.0;
 		for(size_t i = 0; i < trgcount; ++i) {
-			float d = fabs(B.data[i] - B2.data[i]);
-			if(d > asd) asd = d;
+			double a = fabs(B.data[i] - B2.data[i]);
+			double b = fabs(B2.data[i]);
+			if(a == 0.0 && b == 0.0) continue;
+			float ch = a / b;
+			if(ch > maxch) maxch = ch;
+			
 		}
-		printf("Iteration #%d: maximum matrix element difference %f\n", i + 1, asd);
+		printf(
+			"Iteration #%d: maximum relative change %e\n",
+		i + 1, maxch);
+		if(maxch < 0.00005) {
+			printf("Maximum relative change below limit 0.005%%, stopping.\n");
+			break;
+		}
 	}
 	
 	// Read the result from B.
