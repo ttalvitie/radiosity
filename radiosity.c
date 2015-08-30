@@ -21,6 +21,7 @@ static inline vec3 triangle_point(triangle trg, float u, float v) {
 static inline float radiosity_matrix_element(
 	triangle* trgs, size_t trgcount,
 	raycast raycast_ctx,
+	size_t trgsamplecount, float* trgsample_u, float* trgsample_v,
 	size_t i, size_t j
 ) {
 	if(j == trgcount) {
@@ -34,11 +35,10 @@ static inline float radiosity_matrix_element(
 		return 0.0;
 	}
 	
-	vec3 ci = triangle_centroid(trgs[i]);
-	vec3 cj = triangle_centroid(trgs[j]);
-	
-	// If the centroids do not see each other, no light propagation.
-	if(raycast_query(raycast_ctx, ci, cj)) return 0.0;
+	// If the triangles do not see each other, no light propagation
+	if(raycast_query(
+		raycast_ctx, triangle_centroid(trgs[i]), triangle_centroid(trgs[j])
+	)) return 0.0;
 	
 	vec3 ni = triangle_normal(trgs[i]);
 	vec3 nj = triangle_normal(trgs[j]);
@@ -50,18 +50,10 @@ static inline float radiosity_matrix_element(
 	// radiosity value for those points as the value for the triangles.
 	float val = 0.0;
 	
-/*	const int samplecnt = 4;
-	const float sample_u[] = {0.167, 0.333, 0.667, 0.167};
-	const float sample_v[] = {0.167, 0.333, 0.167, 0.667};
-*/	
-	const int samplecnt = 9;
-	const float sample_u[] = {0.111, 0.222, 0.444, 0.555, 0.777, 0.111, 0.222, 0.444, 0.111};
-	const float sample_v[] = {0.111, 0.222, 0.111, 0.222, 0.111, 0.444, 0.555, 0.444, 0.777};
-	
-	for(int si = 0; si < samplecnt; ++si) {
-		vec3 vi = triangle_point(trgs[i], sample_u[si], sample_v[si]);
-		for(int sj = 0; sj < samplecnt; ++sj) {
-			vec3 vj = triangle_point(trgs[j], sample_u[sj], sample_v[sj]);
+	for(int si = 0; si < trgsamplecount; ++si) {
+		vec3 vi = triangle_point(trgs[i], trgsample_u[si], trgsample_v[si]);
+		for(int sj = 0; sj < trgsamplecount; ++sj) {
+			vec3 vj = triangle_point(trgs[j], trgsample_u[sj], trgsample_v[sj]);
 			
 			vec3 diff = vec3_sub(vj, vi);
 			float difflen = vec3_len(diff);
@@ -77,7 +69,7 @@ static inline float radiosity_matrix_element(
 			val += term;
 		}
 	}
-	val /= (float)samplecnt * (float)samplecnt;
+	val /= (float)trgsamplecount * (float)trgsamplecount;
 	val *= triangle_area(trgs[j]);
 	
 	if(isnan(val)) {
@@ -104,6 +96,22 @@ typedef struct {
 } matrix_job;
 
 static void* matrix_worker(void* ptr) {
+	// Precompute triangle sampling pattern for radiosity_matrix_element.
+	size_t trgsample_res = 4;
+	size_t trgsamplecount = trgsample_res * trgsample_res;
+	float* trgsample_u = checked_malloc2(trgsamplecount, sizeof(float));
+	float* trgsample_v = checked_malloc2(trgsamplecount, sizeof(float));
+	size_t pos = 0;
+	for(size_t i = 0; i < trgsample_res; ++i) {
+	for(size_t j = 0; j < trgsample_res - i; ++j) {
+	for(size_t a = 0; a <= (i + j != trgsample_res - 1); ++a) {
+		trgsample_u[pos] = ((float)i + (a ? 2 : 1) / 3.0) / (float)trgsample_res;
+		trgsample_v[pos] = ((float)j + (a ? 2 : 1) / 3.0) / (float)trgsample_res;
+		++pos;
+	}
+	}
+	}
+	
 	matrix_job* job = (matrix_job*)ptr;
 	while(1) {
 #ifdef WORKERTHREADS
@@ -131,10 +139,15 @@ static void* matrix_worker(void* ptr) {
 			job->Y.data[Ypos++] = radiosity_matrix_element(
 				job->trgs, job->trgcount,
 				job->raycast_ctx,
+				trgsamplecount, trgsample_u, trgsample_v,
 				i, j
 			);
 		}
 	}
+	
+	free(trgsample_u);
+	free(trgsample_v);
+	
 	return NULL;
 }
 
@@ -204,7 +217,7 @@ void compute_radiosity(
 		printf(
 			"Iteration #%d: maximum relative change %e\n",
 		i + 1, maxch);
-		if(maxch < 0.00005) {
+		if(maxch < 0.005e-2) {
 			printf("Maximum relative change below limit 0.005%%, stopping.\n");
 			break;
 		}
