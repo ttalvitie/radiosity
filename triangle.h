@@ -55,7 +55,7 @@ static inline int segment_intersects_triangle(vec3 a, vec3 b, triangle trg) {
 	if((da > 0.0f) == (db > 0.0f)) return 0;
 	
 	float t = da / (da - db);
-	if(t < 1e-4f || t > 1.0f - 1e-4f) return 0;
+	if(t < 1e-5f || t > 1.0f - 1e-5f) return 0;
 	
 	vec3 v = vec3_add(vec3_mul(a, 1.0f - t), vec3_mul(b, t));
 	
