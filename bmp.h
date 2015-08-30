@@ -15,17 +15,17 @@ typedef struct {
 	uint8_t* data;
 } bmp_canvas;
 
-/// Create a BMP context.
+/// Creates a BMP context.
 /// \param width Width of the image.
 /// \param height Height of the image.
 bmp_canvas bmp_start(size_t width, size_t height);
 
-/// Write a BMP containing everything drawn to a context. Destroys the context.
+/// Writes a BMP containing everything drawn to a context. Destroys the context.
 /// \param canvas The context to write and free.
 /// \param filename The name of the file to write to.
 void bmp_write(bmp_canvas canvas, const char* filename);
 
-/// Draw triangle (\p x1, \p y1), (\p x2, \p y2), (\p x3, \p y3) to \p canvas
+/// Draws triangle (\p x1, \p y1), (\p x2, \p y2), (\p x3, \p y3) to \p canvas
 /// with colors (\p r, \p g, \p b).
 void bmp_draw(
 	bmp_canvas canvas,
