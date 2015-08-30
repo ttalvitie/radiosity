@@ -332,14 +332,15 @@ int main() {
 	
 	// Sun.
 	float sunsz = 1;
-	emi = 50.0 / (sunsz * sunsz);
-	float suny = 10;
+	emi = 12.5 / (sunsz * sunsz);
+	float suny = 5;
+	float sunx = 5;
 	float sunz = -1.0 + sunsz;
 	quad(
-		10, suny - sunsz, sunz - sunsz,
-		10, suny + sunsz, sunz - sunsz,
-		10, suny + sunsz, sunz + sunsz,
-		10, suny - sunsz, sunz + sunsz
+		sunx, suny - sunsz, sunz - sunsz,
+		sunx, suny + sunsz, sunz - sunsz,
+		sunx, suny + sunsz, sunz + sunsz,
+		sunx, suny - sunsz, sunz + sunsz
 	);
 	
 	// Lamp
