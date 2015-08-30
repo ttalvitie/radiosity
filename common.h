@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#define PI 3.14159265358979323846
+static const float PI = 3.14159265358979323846f;
 
 /// Simple error handler that outputs an error message given in the style of
 /// printf() and aborts.

@@ -137,7 +137,7 @@ void bmp_write(bmp_canvas canvas, const char* filename) {
 }
 
 size_t clamp_to_size_t(float x, size_t limit) {
-	if(x < 0.0) return 0;
+	if(x < 0.0f) return 0;
 	if(x > (float)limit) return limit;
 	size_t ret = (size_t)x;
 	if(ret > limit) ret = limit;
@@ -174,7 +174,7 @@ void bmp_draw(
 	}
 	
 	size_t y_lo = clamp_to_size_t(v[0].y, canvas.height);
-	size_t y_hi = clamp_to_size_t(v[2].y + 1.0, canvas.height);
+	size_t y_hi = clamp_to_size_t(v[2].y + 1.0f, canvas.height);
 	
 	for(size_t y = y_lo; y < y_hi; ++y) {
 		float yd = (float)y;
@@ -198,7 +198,7 @@ void bmp_draw(
 		}
 		
 		size_t x_lo = clamp_to_size_t(x1, canvas.width);
-		size_t x_hi = clamp_to_size_t(x2 + 1.0, canvas.width);
+		size_t x_hi = clamp_to_size_t(x2 + 1.0f, canvas.width);
 		
 		size_t pos = y * canvas.pitch + 3 * x_lo;
 		for(size_t x = x_lo; x < x_hi; ++x, pos += 3) {

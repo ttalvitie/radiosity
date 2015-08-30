@@ -7,13 +7,13 @@ static void draw_triangle(
 ) {
 	// Determine pixel color by radiosity.
 	int color;
-	if(vec3_dot(triangle_normal(trg), trg.corners[0]) < 0.0) {
+	if(vec3_dot(triangle_normal(trg), trg.corners[0]) < 0.0f) {
 		float radiosity = trg.radiosity;
-		if(radiosity < 0.0) radiosity = 0.0;
-		if(radiosity > 1.0) radiosity = 1.0;
+		if(radiosity < 0.0f) radiosity = 0.0f;
+		if(radiosity > 1.0f) radiosity = 1.0f;
 		
 		// Gamma correction.
-		radiosity = pow(radiosity, 0.8);
+		radiosity = pow(radiosity, 0.8f);
 		
 		color = floor(256 * radiosity);
 		if(color < 0) color = 0;
@@ -43,12 +43,12 @@ static void draw_triangle(
 				// We only draw the points that are in front of the camera.
 				// Because of that we also have to draw the collision points of
 				// the triangle frame with the plane z = 0.
-				if((a.z > 0.0) != (b.z > 0.0)) {
+				if((a.z > 0.0f) != (b.z > 0.0f)) {
 					float t = -a.z / (b.z - a.z);
 					float x = a.x + t * (b.x - a.x);
 					float y = a.y + t * (b.y - a.y);
 					float r = sqrt(x * x + y * y);
-					if(r > 0.0) {
+					if(r > 0.0f) {
 						float coef = 1e5 / r;
 						x *= coef;
 						y *= coef;
@@ -58,7 +58,7 @@ static void draw_triangle(
 					++vertcount;
 				}
 				
-				if(b.z > 0.0) {
+				if(b.z > 0.0f) {
 					xs[vertcount] = b.x / b.z;
 					ys[vertcount] = b.y / b.z;
 					++vertcount;
@@ -71,9 +71,9 @@ static void draw_triangle(
 			for(size_t i = 2; i < vertcount; ++i) {
 				bmp_draw(
 					canvas, 
-					0.5 * wd + coef * xs[0], 0.5 * hd + coef * ys[0],
-					0.5 * wd + coef * xs[1], 0.5 * hd + coef * ys[1],
-					0.5 * wd + coef * xs[i], 0.5 * hd + coef * ys[i],
+					0.5f * wd + coef * xs[0], 0.5f * hd + coef * ys[0],
+					0.5f * wd + coef * xs[1], 0.5f * hd + coef * ys[1],
+					0.5f * wd + coef * xs[i], 0.5f * hd + coef * ys[i],
 					color, color, color
 				);
 			}
@@ -113,7 +113,7 @@ void draw_to_bmp(const char* filename, triangle* trgs, size_t trgcount) {
 	
 	for(size_t i = 0; i < trgcount; ++i) {
 		trgdists[i].index = i;
-		float maxdist = 0.0;
+		float maxdist = 0.0f;
 		for(int j = 0; j < 3; ++j) {
 			float dist = vec3_len2(trgs[i].corners[j]);
 			if(dist > maxdist) maxdist = dist;
@@ -123,7 +123,7 @@ void draw_to_bmp(const char* filename, triangle* trgs, size_t trgcount) {
 	
 	qsort(trgdists, trgcount, sizeof(triangle_distance), triangle_distance_cmp);
 	
-	float coef = 0.5 * wd / tan(PI * fov / 180.0);
+	float coef = 0.5f * wd / tan(PI * fov / 180.0f);
 	for(size_t i = 0; i < trgcount; ++i) {
 		draw_triangle(canvas, trgs[trgdists[i].index], wd, hd, coef);
 	}

@@ -26,13 +26,13 @@ static inline float radiosity_matrix_element(
 ) {
 	if(j == trgcount) {
 		if(i == trgcount) {
-			return 1.0;
+			return 1.0f;
 		} else {
 			return trgs[i].emitted_energy;
 		}
 	}
 	if(i == trgcount || i == j) {
-		return 0.0;
+		return 0.0f;
 	}
 	
 	vec3 ni = triangle_normal(trgs[i]);
@@ -43,7 +43,7 @@ static inline float radiosity_matrix_element(
 	
 	// Sample some points from both triangles and use the average of the
 	// radiosity value for those points as the value for the triangles.
-	float val = 0.0;
+	float val = 0.0f;
 	
 	for(int si = 0; si < trgsamplecount; ++si) {
 		vec3 vi = triangle_point(trgs[i], trgsample_u[si], trgsample_v[si]);
@@ -57,7 +57,7 @@ static inline float radiosity_matrix_element(
 			float cosj = -vec3_dot(nj, diff) / (difflen * nj_len);
 			
 			// If the triangles do not face each other, no light propagation.
-			if(cosi <= 0.0 || cosj <= 0.0) continue;
+			if(cosi <= 0.0f || cosj <= 0.0f) continue;
 			
 			float term = trgs[i].reflectivity * cosi * cosj;
 			term /= PI * difflen * difflen;
@@ -74,7 +74,7 @@ static inline float radiosity_matrix_element(
 		);
 	}
 	
-	if(val == 0.0) return val;
+	if(val == 0.0f) return val;
 	
 	// Light propagates only if the triangles see each other.
 	vec3 ci = triangle_centroid(trgs[i]);
@@ -82,16 +82,16 @@ static inline float radiosity_matrix_element(
 	
 	for(int a = 0; a < 3; ++a) {
 		vec3 vi = vec3_add(
-			vec3_mul(ci, 0.25),
-			vec3_mul(trgs[i].corners[a], 0.75)
+			vec3_mul(ci, 0.25f),
+			vec3_mul(trgs[i].corners[a], 0.75f)
 		);
 		vec3 vj = vec3_add(
-			vec3_mul(cj, 0.25),
-			vec3_mul(trgs[j].corners[a], 0.75)
+			vec3_mul(cj, 0.25f),
+			vec3_mul(trgs[j].corners[a], 0.75f)
 		);
 		if(!raycast_query(raycast_ctx, vi, vj)) return val;
 	}
-	return 0.0;
+	return 0.0f;
 }
 
 typedef struct {
@@ -117,8 +117,8 @@ static void* matrix_worker(void* ptr) {
 	for(size_t i = 0; i < trgsample_res; ++i) {
 	for(size_t j = 0; j < trgsample_res - i; ++j) {
 	for(size_t a = 0; a <= (i + j != trgsample_res - 1); ++a) {
-		trgsample_u[pos] = ((float)i + (a ? 2 : 1) / 3.0) / (float)trgsample_res;
-		trgsample_v[pos] = ((float)j + (a ? 2 : 1) / 3.0) / (float)trgsample_res;
+		trgsample_u[pos] = ((float)i + (a ? 2 : 1) / 3.0f) / (float)trgsample_res;
+		trgsample_v[pos] = ((float)j + (a ? 2 : 1) / 3.0f) / (float)trgsample_res;
 		++pos;
 	}
 	}
@@ -176,9 +176,9 @@ void compute_radiosity(
 	matrix Y = create_matrix(trgcount + 1);
 	
 	for(size_t i = 0; i < trgcount; ++i) {
-		B.data[i] = 0.0;
+		B.data[i] = 0.0f;
 	}
-	B.data[trgcount] = 1.0;
+	B.data[trgcount] = 1.0f;
 	
 	matrix_job job;
 	job.trgs = trgs;
@@ -217,11 +217,11 @@ void compute_radiosity(
 		B = B2;
 		B2 = tmp;
 		
-		float maxch = 0.0;
+		float maxch = 0.0f;
 		for(size_t i = 0; i < trgcount; ++i) {
 			double a = fabs(B.data[i] - B2.data[i]);
 			double b = fabs(B2.data[i]);
-			if(a == 0.0 && b == 0.0) continue;
+			if(a == 0.0f && b == 0.0f) continue;
 			float ch = a / b;
 			if(ch > maxch) maxch = ch;
 			
@@ -229,7 +229,7 @@ void compute_radiosity(
 		printf(
 			"Iteration #%d: maximum relative change %e\n",
 		i + 1, maxch);
-		if(maxch < 0.005e-2) {
+		if(maxch < 0.005e-2f) {
 			printf("Maximum relative change below limit 0.005%%, stopping.\n");
 			break;
 		}

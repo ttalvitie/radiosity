@@ -34,12 +34,12 @@ static inline vec3 triangle_normal(triangle trg) {
 static inline vec3 triangle_centroid(triangle trg) {
 	vec3 ret = vec3_add(trg.corners[0], trg.corners[1]);
 	ret = vec3_add(ret, trg.corners[2]);
-	ret = vec3_mul(ret, 1.0 / 3.0);
+	ret = vec3_mul(ret, 1.0f / 3.0f);
 	return ret;
 }
 /// Computes the area of triangle \p trg.
 static inline float triangle_area(triangle trg) {
-	return 0.5 * vec3_len(vec3_cross(
+	return 0.5f * vec3_len(vec3_cross(
 		vec3_sub(trg.corners[2], trg.corners[0]),
 		vec3_sub(trg.corners[1], trg.corners[0])
 	));
@@ -52,19 +52,19 @@ static inline int segment_intersects_triangle(vec3 a, vec3 b, triangle trg) {
 	
 	float da = vec3_dot(vec3_sub(a, c), n);
 	float db = vec3_dot(vec3_sub(b, c), n);
-	if((da > 0.0) == (db > 0.0)) return 0;
+	if((da > 0.0f) == (db > 0.0f)) return 0;
 	
 	float t = da / (da - db);
-	if(t < 1e-4 || t > 1.0 - 1e-4) return 0;
+	if(t < 1e-4f || t > 1.0f - 1e-4f) return 0;
 	
-	vec3 v = vec3_add(vec3_mul(a, 1.0 - t), vec3_mul(b, t));
+	vec3 v = vec3_add(vec3_mul(a, 1.0f - t), vec3_mul(b, t));
 	
 	triangle subtrg = trg;
 	
 	for(int i = 0; i < 3; ++i) {
 		subtrg.corners[i] = v;
 		vec3 n2 = triangle_normal(subtrg);
-		if(vec3_dot(n, n2) < 0.0) return 0;
+		if(vec3_dot(n, n2) < 0.0f) return 0;
 		subtrg.corners[i] = trg.corners[i];
 	}
 	return 1;

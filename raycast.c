@@ -25,14 +25,14 @@ static inline int segment_intersects_node(
 	}
 	
 	if(
-		ca[0] >= 0.0 && ca[0] <= 1.0 &&
-		ca[1] >= 0.0 && ca[1] <= 1.0 &&
-		ca[2] >= 0.0 && ca[2] <= 1.0
+		ca[0] >= 0.0f && ca[0] <= 1.0f &&
+		ca[1] >= 0.0f && ca[1] <= 1.0f &&
+		ca[2] >= 0.0f && ca[2] <= 1.0
 	) return 1;
 	if(
-		cb[0] >= 0.0 && cb[0] <= 1.0 &&
-		cb[1] >= 0.0 && cb[1] <= 1.0 &&
-		cb[2] >= 0.0 && cb[2] <= 1.0
+		cb[0] >= 0.0f && cb[0] <= 1.0f &&
+		cb[1] >= 0.0f && cb[1] <= 1.0f &&
+		cb[2] >= 0.0f && cb[2] <= 1.0
 	) return 1;
 	
 	for(int i = 0; i < 3; ++i) {
@@ -44,8 +44,8 @@ static inline int segment_intersects_node(
 			int in = 1;
 			for(int j = 0; j < 3; ++j) {
 				if(i == j) continue;
-				float c = (1.0 - t) * ca[j] + t * cb[j];
-				if(c < 0.0 || c > 1.0) in = 0;
+				float c = (1.0f - t) * ca[j] + t * cb[j];
+				if(c < 0.0f || c > 1.0f) in = 0;
 			}
 			
 			if(in) return 1;
@@ -61,7 +61,7 @@ static inline float vec3_coord(vec3 v, int i) {
 	return v.z;
 }
 static inline float triangle_min(triangle trg, int i) {
-	float ret = 1.0 / 0.0;
+	float ret = 1.0f / 0.0f;
 	for(int j = 0; j < 3; ++j) {
 		float c = vec3_coord(trg.corners[j], i);
 		if(c < ret) ret = c;
@@ -69,7 +69,7 @@ static inline float triangle_min(triangle trg, int i) {
 	return ret;
 }
 static inline float triangle_max(triangle trg, int i) {
-	float ret = -1.0 / 0.0;
+	float ret = -1.0f / 0.0f;
 	for(int j = 0; j < 3; ++j) {
 		float c = vec3_coord(trg.corners[j], i);
 		if(c > ret) ret = c;
@@ -82,8 +82,8 @@ static raycast_tree_node* create_tree(triangle* trgs, size_t trgcount) {
 	raycast_tree_node* tree = checked_malloc(sizeof(raycast_tree_node));
 	
 	for(int i = 0; i < 3; ++i) {
-		tree->lo[i] = 1.0 / 0.0;
-		tree->hi[i] = -1.0 / 0.0;
+		tree->lo[i] = 1.0f / 0.0f;
+		tree->hi[i] = -1.0f / 0.0f;
 	}
 	
 	for(size_t i = 0; i < trgcount; ++i) {
@@ -98,7 +98,7 @@ static raycast_tree_node* create_tree(triangle* trgs, size_t trgcount) {
 	}
 	for(int i = 0; i < 3; ++i) {
 		if(tree->lo[i] >= tree->hi[i]) {
-			tree->hi[i] = tree->lo[i] + 1.0;
+			tree->hi[i] = tree->lo[i] + 1.0f;
 		}
 	}
 	
@@ -110,7 +110,7 @@ static raycast_tree_node* create_tree(triangle* trgs, size_t trgcount) {
 	} else {
 		// Split the bounding box by its longest side.
 		int split_dir = 0;
-		float split_len = -1.0;
+		float split_len = -1.0f;
 		for(int i = 0; i < 3; ++i) {
 			float len = tree->hi[i] - tree->lo[i];
 			if(len > split_len) {
@@ -119,7 +119,7 @@ static raycast_tree_node* create_tree(triangle* trgs, size_t trgcount) {
 			}
 		}
 		
-		float split_pos = 0.5 * (tree->lo[split_dir] + tree->hi[split_dir]);
+		float split_pos = 0.5f * (tree->lo[split_dir] + tree->hi[split_dir]);
 		
 		// Split the triangles to this node and the children by the split_dir
 		// coordinates.

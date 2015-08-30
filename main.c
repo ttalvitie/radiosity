@@ -24,21 +24,21 @@ static void apply_transform(
 ) {
 	float a = yaw;
 	float yaw_matrix_data[] = {
-		 cos(a),     0.0,  sin(a),
-		    0.0,     1.0,     0.0,
-		-sin(a),     0.0,  cos(a)
+		 cos(a),    0.0f,  sin(a),
+		   0.0f,    1.0f,    0.0f,
+		-sin(a),    0.0f,  cos(a)
 	};
 	a = pitch;
 	float pitch_matrix_data[] = {
-		    1.0,     0.0,     0.0,
-		    0.0,  cos(a), -sin(a),
-		    0.0,  sin(a),  cos(a)
+		   1.0f,    0.0f,    0.0f,
+		   0.0f,  cos(a), -sin(a),
+		   0.0f,  sin(a),  cos(a)
 	};
 	a = roll;
 	float roll_matrix_data[] = {
-		 cos(a), -sin(a),     0.0,
-		 sin(a),  cos(a),     0.0,
-		    0.0,     0.0,     1.0
+		 cos(a), -sin(a),    0.0f,
+		 sin(a),  cos(a),    0.0f,
+		   0.0f,    0.0f,    1.0f
 	};
 	
 	matrix yaw_matrix;
@@ -91,9 +91,9 @@ int main(int argc, char* argv[]) {
 	float camera_x = param_to_float(argv[4]);
 	float camera_y = param_to_float(argv[5]);
 	float camera_z = param_to_float(argv[6]);
-	float camera_yaw = PI * param_to_float(argv[7]) / 180.0;
-	float camera_pitch = PI * param_to_float(argv[8]) / 180.0;
-	float camera_roll = PI * param_to_float(argv[9]) / 180.0;
+	float camera_yaw = PI * param_to_float(argv[7]) / 180.0f;
+	float camera_pitch = PI * param_to_float(argv[8]) / 180.0f;
+	float camera_roll = PI * param_to_float(argv[9]) / 180.0f;
 	
 	triangle* orig_trgs;
 	size_t orig_trgcount;

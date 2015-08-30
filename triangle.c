@@ -3,21 +3,21 @@
 #include <errno.h>
 
 void normalize_triangle_radiosities(triangle* trgs, size_t trgcount) {
-	float maxval = 0.0;
+	float maxval = 0.0f;
 	for(size_t i = 0; i < trgcount; ++i) {
 		// Only take into account the triangles that are not lights, i.e. do not
 		// emit light.
-		if(trgs[i].emitted_energy > 0.0) continue;
+		if(trgs[i].emitted_energy > 0.0f) continue;
 		
 		float val = trgs[i].radiosity;
 		if(val > maxval) maxval = val;
 	}
-	if(maxval == 0.0) maxval = 1.0;
+	if(maxval == 0.0f) maxval = 1.0f;
 	
 	for(size_t i = 0; i < trgcount; ++i) {
-		float t = 0.8 * trgs[i].radiosity / maxval;
-		if(t < 0.0) t = 0.0;
-		if(t > 1.0) t = 1.0;
+		float t = 0.8f * trgs[i].radiosity / maxval;
+		if(t < 0.0f) t = 0.0f;
+		if(t > 1.0f) t = 1.0f;
 		trgs[i].radiosity = t;
 	}
 }
@@ -29,10 +29,10 @@ static void add_subdivided_triangle(
 	size_t* count,
 	size_t* allocated
 ) {
-	if(edge_length_limit2 > 0.0) {
+	if(edge_length_limit2 > 0.0f) {
 		// If the longest edge of the triangle has length larger than the limit,
 		// then we split that edge.
-		float maxval = -1.0;
+		float maxval = -1.0f;
 		int maxval_i = 0;
 		for(int i = 0; i < 3; ++i) {
 			int j = (i + 1) % 3;
@@ -52,9 +52,9 @@ static void add_subdivided_triangle(
 			
 			// We don't split exactly at the center to have some nice randomness
 			// in the triangles.
-			double t = 0.4 + 0.2 * (double)rand() / (double)RAND_MAX;
+			double t = 0.4f + 0.2f * (double)rand() / (double)RAND_MAX;
 			vec3 split = vec3_add(
-				vec3_mul(trg.corners[i], 1.0 - t),
+				vec3_mul(trg.corners[i], 1.0f - t),
 				vec3_mul(trg.corners[j], t)
 			);
 			
@@ -117,7 +117,7 @@ size_t read_triangles_from_file(const char* filename, triangle** output) {
 	
 	while(1) {
 		triangle trg;
-		trg.radiosity = 0.0;
+		trg.radiosity = 0.0f;
 		errno = 0;
 		int read = fscanf(
 			fp, "%f %f %f %f %f %f %f %f %f %f %f",
