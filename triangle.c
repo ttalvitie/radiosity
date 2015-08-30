@@ -15,7 +15,7 @@ void normalize_triangle_radiosities(triangle* trgs, size_t trgcount) {
 	if(maxval == 0.0f) maxval = 1.0f;
 	
 	for(size_t i = 0; i < trgcount; ++i) {
-		float t = 0.8f * trgs[i].radiosity / maxval;
+		float t = 0.9f * trgs[i].radiosity / maxval;
 		if(t < 0.0f) t = 0.0f;
 		if(t > 1.0f) t = 1.0f;
 		trgs[i].radiosity = t;

@@ -10,7 +10,7 @@ void reset() {
 	x = 0.0;
 	y = 0.0;
 	z = 0.0;
-	ref = 0.97;
+	ref = 0.9;
 	emi = 0.0;
 	inv = 0;
 }
@@ -344,7 +344,7 @@ int main() {
 	);
 	
 	// Lamp
-	emi = 1;
+	emi = 1.5;
 	y = 0.725;
 	x = -0.3;
 	sphere(0.075, 10);
