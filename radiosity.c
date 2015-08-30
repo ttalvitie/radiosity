@@ -35,11 +35,6 @@ static inline float radiosity_matrix_element(
 		return 0.0;
 	}
 	
-	// If the triangles do not see each other, no light propagation
-	if(raycast_query(
-		raycast_ctx, triangle_centroid(trgs[i]), triangle_centroid(trgs[j])
-	)) return 0.0;
-	
 	vec3 ni = triangle_normal(trgs[i]);
 	vec3 nj = triangle_normal(trgs[j]);
 	
@@ -79,7 +74,24 @@ static inline float radiosity_matrix_element(
 		);
 	}
 	
-	return val;
+	if(val == 0.0) return val;
+	
+	// Light propagates only if the triangles see each other.
+	vec3 ci = triangle_centroid(trgs[i]);
+	vec3 cj = triangle_centroid(trgs[j]);
+	
+	for(int a = 0; a < 3; ++a) {
+		vec3 vi = vec3_add(
+			vec3_mul(ci, 0.25),
+			vec3_mul(trgs[i].corners[a], 0.75)
+		);
+		vec3 vj = vec3_add(
+			vec3_mul(cj, 0.25),
+			vec3_mul(trgs[j].corners[a], 0.75)
+		);
+		if(!raycast_query(raycast_ctx, vi, vj)) return val;
+	}
+	return 0.0;
 }
 
 typedef struct {
