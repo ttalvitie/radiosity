@@ -153,12 +153,14 @@ int main() {
 		1, 0, 1,
 		-1, 0, 1
 	);
+	ref = 0.8;
 	quad(
 		-1, 1, -1,
 		-1, 1, 1,
 		1, 1, 1,
 		1, 1, -1
 	);
+	reset();
 	quad(
 		-1, 0, -1,
 		-1, 0, 1,
@@ -330,8 +332,8 @@ int main() {
 	);
 	inv = !inv;
 	
-	// Sun.
-	float sunsz = 1;
+	// Sun
+	float sunsz = 0.6;
 	emi = 12.5 / (sunsz * sunsz);
 	float suny = 5;
 	float sunx = 5;
@@ -344,7 +346,7 @@ int main() {
 	);
 	
 	// Lamp
-	emi = 1.5;
+	emi = 2;
 	y = 0.725;
 	x = -0.3;
 	sphere(0.075, 10);
@@ -358,6 +360,7 @@ int main() {
 	
 	// Table legs
 	reset();
+	ref = 0.7;
 	x = -0.5;
 	z = -0.3;
 	y_cylinder(0.02, 0.35, 16);
@@ -370,6 +373,7 @@ int main() {
 	
 	// Table
 	reset();
+	ref = 0.7;
 	y = 0.36;
 	box(0.55, 0.01, 0.35);
 	
