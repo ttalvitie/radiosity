@@ -24,8 +24,9 @@ raycast raycast_init(triangle* trgs, size_t trgcount);
 
 /// Query whether segment \p a \p b intersects a triangle in the raycasting
 /// data structure \p ctx. Does not change the structure, can be called from
-/// multiple threads at the same time.
-int raycast_query(raycast ctx, vec3 a, vec3 b);
+/// multiple threads at the same time. Will not count intersections with
+/// triangles in groups \p ignore1 or \p ignore2.
+int raycast_query(raycast ctx, vec3 a, vec3 b, size_t ignore1, size_t ignore2);
 
 /// Destroys the raycast data structure.
 /// @param ctx The raycast data structure to free.

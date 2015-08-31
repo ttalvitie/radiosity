@@ -126,6 +126,7 @@ size_t read_triangles_from_file(const char* filename, triangle** output) {
 			&trg.corners[2].x, &trg.corners[2].y, &trg.corners[2].z,
 			&trg.reflectivity, &trg.emitted_energy
 		);
+		trg.group = count;
 		if(read == EOF && !errno) break;
 		if(read != 11) {
 			fail("Error reading input file.");

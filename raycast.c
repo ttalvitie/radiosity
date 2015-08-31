@@ -168,19 +168,25 @@ raycast raycast_init(triangle* trgs, size_t trgcount) {
 	return ctx;
 }
 
-static int raycast_query_tree(raycast_tree_node* tree, vec3 a, vec3 b) {
+static int raycast_query_tree(
+	raycast_tree_node* tree,
+	vec3 a, vec3 b,
+	size_t ignore1, size_t ignore2
+) {
 	if(tree == NULL) return 0;
 	if(!segment_intersects_node(a, b, tree)) return 0;
 	for(size_t i = 0; i < tree->trgcount; ++i) {
+		if(tree->trgs[i].group == ignore1) continue;
+		if(tree->trgs[i].group == ignore2) continue;
 		if(segment_intersects_triangle(a, b, tree->trgs[i])) return 1;
 	}
-	if(raycast_query_tree(tree->child1, a, b)) return 1;
-	if(raycast_query_tree(tree->child2, a, b)) return 1;
+	if(raycast_query_tree(tree->child1, a, b, ignore1, ignore2)) return 1;
+	if(raycast_query_tree(tree->child2, a, b, ignore1, ignore2)) return 1;
 	return 0;
 }
 
-int raycast_query(raycast ctx, vec3 a, vec3 b) {
-	return raycast_query_tree(ctx.tree, a, b);
+int raycast_query(raycast ctx, vec3 a, vec3 b, size_t ignore1, size_t ignore2) {
+	return raycast_query_tree(ctx.tree, a, b, ignore1, ignore2);
 }
 
 static void free_tree(raycast_tree_node* tree) {

@@ -35,6 +35,8 @@ static inline float radiosity_matrix_element(
 		return 0.0f;
 	}
 	
+	if(trgs[i].group == trgs[j].group) return 0.0f;
+	
 	vec3 ni = triangle_normal(trgs[i]);
 	vec3 nj = triangle_normal(trgs[j]);
 	
@@ -89,7 +91,9 @@ static inline float radiosity_matrix_element(
 			vec3_mul(cj, 0.25f),
 			vec3_mul(trgs[j].corners[a], 0.75f)
 		);
-		if(!raycast_query(raycast_ctx, vi, vj)) return val;
+		if(!raycast_query(raycast_ctx, vi, vj, trgs[i].group, trgs[j].group)) {
+			return val;
+		}
 	}
 	return 0.0f;
 }

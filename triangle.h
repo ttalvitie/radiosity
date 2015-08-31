@@ -20,6 +20,10 @@ typedef struct {
 	
 	/// The radiosity value, that is, the total lighting of the triangle.
 	float radiosity;
+	
+	/// The group value of the triangle. Triangles with the same group value
+	/// must be coplanar. Used to avoid some numerical problems.
+	size_t group;
 } triangle;
 
 /// Computes a normal of triangle \p trg towards the active side of the
@@ -55,7 +59,7 @@ static inline int segment_intersects_triangle(vec3 a, vec3 b, triangle trg) {
 	if((da > 0.0f) == (db > 0.0f)) return 0;
 	
 	float t = da / (da - db);
-	if(t < 1e-4f || t > 1.0f - 1e-4f) return 0;
+	if(t < 0.0f || t > 1.0f) return 0;
 	
 	vec3 v = vec3_add(vec3_mul(a, 1.0f - t), vec3_mul(b, t));
 	
@@ -95,7 +99,8 @@ size_t subdivide_triangles(
 
 /// Reads a list of triangles from a text file. The triangles are read as tuples
 /// of 11 floating point values: first the coordinates of the corners, then
-/// reflectivity, and then emitted energy. Radiosity is set to 0.
+/// reflectivity, and then emitted energy. Radiosity is set to 0. All triangles
+/// are given distinct group values.
 /// \param filename The name of the file to read from.
 /// \param output Pointer to the pointer that will be set to the array of the
 ///               output triangles. The array must be freed with \p free.
