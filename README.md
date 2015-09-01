@@ -4,7 +4,7 @@ Radiosity lighting implemented in C.
 Doxygen documentation for the code is available in http://www.cs.helsinki.fi/u/totalvit/radiosity/doc/files.html
 
 ### Example scene
-![Example scene](http://www.cs.helsinki.fi/u/totalvit/radiosity/example/example0.024.png)
+![Example scene](http://www.cs.helsinki.fi/u/totalvit/radiosity/example/example0.020.png)
 
 ### Rendering the example scene
 First compile the code with
