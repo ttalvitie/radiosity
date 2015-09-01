@@ -25,7 +25,7 @@ As an optional parameter, you may specify the edge length limit to `./gen.sh`. T
 ### Performance
 All the tests were run on the [Ukko cluster](https://www.cs.helsinki.fi/tietotekniikka/laskentaklusteri-ukko).
 
-Edge length limit | Triangles | Time (h:m:s) | Memory | Output
+Edge length limit | Triangles | Time (H:mm:ss) | Memory | Output
 ----------------- | --------- | -----| ------ | ------
 0.024 | 207291 | 15:08:38 | 171.88 GB | [PNG](http://www.cs.helsinki.fi/u/totalvit/radiosity/example/example0.024.png)
 0.028 | 154543 | 8:38:42 | 95.53 GB | [PNG](http://www.cs.helsinki.fi/u/totalvit/radiosity/example/example0.028.png)
