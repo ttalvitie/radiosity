@@ -23,7 +23,7 @@ $ ./gen.sh
 As an optional parameter, you may specify the edge length limit to `./gen.sh`. The default value is `0.2`. If you specify a smaller value, the triangles are subdivided into smaller triangles and thus the rendered image will have larger quality. Of course, this drastically increases the time and memory complexity.
 
 ### Performance
-All the tests were run on the [Ukko cluster](https://www.cs.helsinki.fi/tietotekniikka/laskentaklusteri-ukko).
+All the tests were run on the [Ukko cluster](https://www.cs.helsinki.fi/tietotekniikka/laskentaklusteri-ukko). Note that the tests with memory usage above 32G had to use disk storage, causing worse performance.
 
 Edge length limit | Triangles | Time (H:mm:ss) | Memory | Output
 ----------------- | --------- | -----| ------ | ------
