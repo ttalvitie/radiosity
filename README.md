@@ -1,4 +1,6 @@
 # radiosity
+Radiosity lightning implemented in C.
+
 Doxygen documentation for the code is available in http://www.cs.helsinki.fi/u/totalvit/radiosity/doc/files.html
 
 ### Example scene
