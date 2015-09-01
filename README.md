@@ -1,6 +1,9 @@
 # radiosity
 Doxygen documentation for the code is available in http://www.cs.helsinki.fi/u/totalvit/radiosity/doc/files.html
 
+### Example scene
+![Example scene](http://www.cs.helsinki.fi/u/totalvit/radiosity/example/example0.024.png)
+
 ### Rendering the example scene
 First compile the code with
 ```
